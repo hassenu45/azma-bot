@@ -3383,7 +3383,7 @@
             page: window.location.pathname
           };
 
-          fetch('https://azma-bot.onrender.com/api/contact', {
+          fetch('/api/contact', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
@@ -3422,7 +3422,7 @@
       let chatHistory = [];
 
       // تحميل رسالة الترحيب من السيرفر
-      fetch('https://azma-bot.onrender.com/api/get-bot-settings')
+        fetch('/api/get-bot-settings')
         .then(function (r) { return r.json(); })
         .then(function (res) {
           if (res.ok && res.settings && res.settings.welcomeMessage) {
@@ -3481,7 +3481,7 @@
         sendBtn.disabled = true;
         showTyping();
 
-        fetch('https://azma-bot.onrender.com/api/chat', {
+        fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: text, history: chatHistory.slice(-10) })
