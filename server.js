@@ -13,8 +13,7 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
 // ===== ملفات الموقع =====
-// يخدم كل الملفات من المجلد الأب (azma2)
-app.use(express.static(path.join(__dirname, '..')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // ===== Telegram Bot =====
 const bot = new TelegramBot(TOKEN, { polling: true });
@@ -152,7 +151,9 @@ app.post('/api/chat', async (req, res) => {
 });
 
 // ===== الصفحة الرئيسية =====
-app.get('/', (req, res) => res.send('Azma Bot OK'));
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log('Server running on port', PORT));
