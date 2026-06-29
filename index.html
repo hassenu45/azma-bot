@@ -1,0 +1,3853 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- [تعديل الاسم] عنوان الصفحة الفاخر -->
+  <title>أزما | الفخامة الحقيقية</title>
+
+  <!-- Google Fonts: Tajawal (Arabic) & Outfit (Latin/Numbers) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;900&family=Tajawal:wght@300;400;500;700;900&display=swap"
+    rel="stylesheet">
+
+  <style>
+    /* ==========================================
+       1. التهيئات الأساسية ومتغيرات التصميم (Tokens)
+       ========================================== */
+    :root {
+      --bg-color: #0b0a0c;
+      --gold-primary: #d4a84b;
+      --gold-light: #ffe082;
+      --gold-dark: #a37c22;
+      --text-white: #ffffff;
+      --text-gray: rgba(255, 255, 255, 0.7);
+      --glass-bg: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.06);
+      --glass-border-gold: rgba(212, 168, 75, 0.25);
+      --transition-smooth: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    body.light-mode {
+      --bg-color: #f5f0eb;
+      --gold-primary: #b8860b;
+      --gold-light: #d4a84b;
+      --gold-dark: #8b6914;
+      --text-white: #1a1a1a;
+      --text-gray: rgba(0, 0, 0, 0.6);
+      --glass-bg: rgba(255, 255, 255, 0.5);
+      --glass-border: rgba(0, 0, 0, 0.08);
+      --glass-border-gold: rgba(184, 134, 11, 0.3);
+    }
+
+    body.light-mode .product-card {
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    body.light-mode .auth-card {
+      background: rgba(201, 16, 16, 0.3);
+    }
+
+    body.light-mode .navbar {
+      background: rgba(245, 240, 235, 0.7);
+    }
+
+    body.light-mode .product-menu {
+      background: rgba(245, 240, 235, 0.98);
+    }
+
+    body.light-mode .menu-item {
+      color: rgba(0, 0, 0, 0.7);
+    }
+
+    body.light-mode .menu-close-btn {
+      color: var(--gold-primary);
+    }
+
+    body.light-mode .menu-title {
+      color: var(--gold-primary);
+    }
+
+    body.light-mode .social-float.expanded {
+      background: rgba(245, 240, 235, 0.95);
+    }
+
+    body.light-mode .social-float.expanded .social-float-link {
+      color: rgba(0, 0, 0, 0.6);
+    }
+
+    body.light-mode .form-group input,
+    body.light-mode .form-group select {
+      background: rgba(0, 0, 0, 0.05);
+      color: #1a1a1a;
+    }
+
+    body.light-mode .file-upload-box {
+      border-color: rgba(0, 0, 0, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-white);
+      font-family: 'Tajawal', sans-serif;
+      transition: background-color 0.5s ease, color 0.5s ease;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    .latin-font,
+    .logo-text,
+    .product-title,
+    .social-link span,
+    .prod-tab span {
+      font-family: 'Outfit', sans-serif;
+    }
+
+    /* ==========================================
+       2. خلفية الكرات وجسيمات الغبار الذهبي (Particles)
+       ========================================== */
+    .orbs-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -2;
+      overflow: hidden;
+      pointer-events: none;
+      background-color: var(--bg-color);
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+      mix-blend-mode: screen;
+    }
+
+    .orb-gold {
+      width: 350px;
+      height: 350px;
+      background: radial-gradient(circle, rgba(212, 168, 75, 0.25) 0%, rgba(212, 168, 75, 0) 70%);
+      top: -10%;
+      right: -5%;
+      opacity: 0.4;
+      animation: floatOrbGold 22s ease-in-out infinite alternate;
+    }
+
+    .orb-dark-brown {
+      width: 280px;
+      height: 280px;
+      background: radial-gradient(circle, rgba(92, 59, 29, 0.4) 0%, rgba(92, 59, 29, 0) 70%);
+      bottom: -5%;
+      left: -5%;
+      opacity: 0.5;
+      animation: floatOrbBrown 18s ease-in-out infinite alternate;
+    }
+
+    .orb-copper {
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(184, 115, 51, 0.3) 0%, rgba(184, 115, 51, 0) 70%);
+      top: 40%;
+      left: 45%;
+      opacity: 0.35;
+      animation: floatOrbCopper 14s ease-in-out infinite alternate;
+    }
+
+    /* لوحة الجسيمات العائمة */
+    #particles-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    @keyframes floatOrbGold {
+      0% {
+        transform: translate(0, 0) scale(1);
+      }
+
+      50% {
+        transform: translate(-40px, 60px) scale(1.1);
+      }
+
+      100% {
+        transform: translate(30px, -30px) scale(0.9);
+      }
+    }
+
+    @keyframes floatOrbBrown {
+      0% {
+        transform: translate(0, 0) scale(0.9);
+      }
+
+      50% {
+        transform: translate(50px, -40px) scale(1.15);
+      }
+
+      100% {
+        transform: translate(-30px, 30px) scale(1);
+      }
+    }
+
+    @keyframes floatOrbCopper {
+      0% {
+        transform: translate(0, 0) scale(1.1);
+      }
+
+      50% {
+        transform: translate(-30px, -30px) scale(0.9);
+      }
+
+      100% {
+        transform: translate(40px, 40px) scale(1.05);
+      }
+    }
+
+    /* ==========================================
+       3. شريط التنقل الفاخر (Navigation Bar)
+       ========================================== */
+    .navbar {
+      width: 100%;
+      background: rgba(11, 10, 12, 0.5);
+      border: 1px solid var(--glass-border);
+      padding: 1.2rem 4rem;
+      transition: background-color 0.5s ease;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 100;
+      box-sizing: border-box;
+      opacity: 0;
+      transform: translateY(-20px);
+      animation: navReveal 1s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    }
+
+    .nav-container {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+
+    .nav-brand-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .nav-logo-img {
+      height: 32px;
+      width: auto;
+      filter: drop-shadow(0 0 8px rgba(212, 168, 75, 0.4));
+    }
+
+    .nav-brand-text {
+      font-size: 1.7rem;
+      font-weight: 900;
+      color: var(--text-white);
+      letter-spacing: 2px;
+      font-family: 'Tajawal', sans-serif;
+      background: linear-gradient(135deg, #ffffff 0%, var(--gold-primary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .logout-btn {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: rgba(255, 255, 255, 0.7);
+      padding: 0.5rem 1.4rem;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 700;
+      font-family: 'Tajawal', sans-serif;
+      transition: var(--transition-smooth);
+    }
+
+    .logout-btn:hover {
+      border-color: #ea4335;
+      color: #ea4335;
+      background: rgba(234, 67, 53, 0.05);
+    }
+
+    .hamburger-btn {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      padding: 4px;
+      margin-left: 1rem;
+    }
+
+    .hamburger-btn span {
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: var(--gold-primary);
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    .hamburger-btn.active span:nth-child(1) {
+      transform: rotate(45deg) translate(5px, 5px);
+    }
+
+    .hamburger-btn.active span:nth-child(2) {
+      opacity: 0;
+    }
+
+    .hamburger-btn.active span:nth-child(3) {
+      transform: rotate(-45deg) translate(5px, -5px);
+    }
+
+    .product-menu-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+
+    .product-menu-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .product-menu {
+      position: fixed;
+      top: 0;
+      left: -300px;
+      width: 280px;
+      height: 100vh;
+      background: rgba(11, 10, 12, 0.98);
+      border-right: 1px solid var(--glass-border-gold);
+      z-index: 201;
+      padding: 2rem 1.2rem;
+      display: flex;
+      flex-direction: column;
+      transition: left 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .product-menu-overlay.open .product-menu {
+      left: 0;
+    }
+
+    .menu-close-btn {
+      background: transparent;
+      border: none;
+      color: var(--gold-primary);
+      font-size: 2.2rem;
+      font-weight: 300;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      align-self: flex-end;
+      line-height: 0.7;
+      padding: 0.3rem 0.2rem;
+      margin-bottom: 0.5rem;
+      text-shadow: 0 0 15px rgba(212, 168, 75, 0.2);
+    }
+
+    .menu-close-btn:hover {
+      color: var(--gold-light);
+      transform: translateX(-3px);
+      text-shadow: 0 0 25px rgba(212, 168, 75, 0.4);
+    }
+
+    .menu-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--gold-light);
+      text-align: center;
+      margin: 1rem 0 1.5rem 0;
+      font-family: 'Tajawal', sans-serif;
+    }
+
+    .menu-items {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      flex: 1;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.9rem 1.2rem;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 14px;
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .menu-item:hover {
+      background: rgba(212, 168, 75, 0.08);
+      border-color: var(--glass-border-gold);
+      color: var(--gold-light);
+    }
+
+    .menu-item-icon {
+      font-size: 1.4rem;
+    }
+
+    .menu-item-name {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .menu-divider {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.06);
+      margin: 0.4rem 0;
+    }
+
+    .menu-toggle.active {
+      background: rgba(212, 168, 75, 0.08);
+      border-color: var(--glass-border-gold);
+      color: var(--gold-light);
+    }
+
+    @keyframes navReveal {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ==========================================
+       4. التخطيط العام وتأثير الظهور (Reveal)
+       ========================================== */
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      justify-content: space-between;
+      padding: 8rem 4rem 2rem 4rem;
+      /* إزاحة علوية للشريط الثابت */
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 1440px;
+      margin: 0 auto;
+      box-sizing: border-box;
+    }
+
+    .split-layout {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3rem;
+      flex: 1;
+      width: 100%;
+    }
+
+    .reveal-up {
+      opacity: 0;
+      transform: translateY(40px);
+      animation: revealUp 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    }
+
+    .delay-1 {
+      animation-delay: 0.1s;
+    }
+
+    .delay-2 {
+      animation-delay: 0.3s;
+    }
+
+    .delay-3 {
+      animation-delay: 0.5s;
+    }
+
+    @keyframes revealUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ==========================================
+        5. القسم الأيسر: لوحة العرض (Showcase)
+        ========================================== */
+    .showcase-side {
+      flex: none;
+      width: 100%;
+      max-width: 820px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 1.5rem;
+    }
+
+    .royal-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: rgba(212, 168, 75, 0.08);
+      border: 1px solid var(--glass-border-gold);
+      color: var(--gold-light);
+      padding: 0.6rem 1.4rem;
+      border-radius: 50px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      box-shadow: 0 4px 20px rgba(212, 168, 75, 0.05);
+      align-self: flex-start;
+    }
+
+    .main-title {
+      font-size: 3.8rem;
+      font-weight: 900;
+      line-height: 1.25;
+      color: var(--text-white);
+      text-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+      margin: 0.5rem 0;
+    }
+
+    .gold-gradient {
+      background: linear-gradient(135deg, #ffe082 0%, #d4a84b 50%, #b8860b 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: inline-block;
+    }
+
+    .description {
+      font-size: 1.15rem;
+      color: var(--text-gray);
+      line-height: 1.8;
+      max-width: 580px;
+      margin-bottom: 1rem;
+    }
+
+    .products-preview {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.6rem;
+      width: 100%;
+      margin-top: 1rem;
+    }
+
+    .pyramid-row {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 1.8rem;
+      width: 100%;
+    }
+
+    .product-card {
+      width: 100%;
+      max-width: 240px;
+      min-width: 0;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 1.8rem 1.5rem 1.2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      transition: var(--transition-smooth);
+      position: relative;
+    }
+
+    .product-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: 24px;
+      padding: 1px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    .product-card.mug-card {
+      animation: floatMug 6s ease-in-out infinite alternate;
+    }
+
+    .product-card.tshirt-card {
+      animation: floatTshirt 7s ease-in-out infinite alternate;
+      animation-delay: 0.6s;
+    }
+
+    .product-card.cap-card {
+      animation: floatCap 6.5s ease-in-out infinite alternate;
+      animation-delay: 1.2s;
+    }
+
+    .product-card.pillow-card {
+      animation: floatPillow 7.5s ease-in-out infinite alternate;
+      animation-delay: 1.8s;
+    }
+
+    .product-card.stickers-card {
+      animation: floatStickers 5.5s ease-in-out infinite alternate;
+      animation-delay: 0.3s;
+    }
+
+    .product-card.frame-card {
+      animation: floatFrame 6.8s ease-in-out infinite alternate;
+      animation-delay: 2.2s;
+    }
+
+    .product-card:hover {
+      animation-play-state: paused;
+      border-color: var(--glass-border-gold);
+      box-shadow: 0 25px 50px rgba(212, 168, 75, 0.1);
+    }
+
+    .product-card:hover.mug-card,
+    .product-card:hover.tshirt-card,
+    .product-card:hover.cap-card,
+    .product-card:hover.pillow-card,
+    .product-card:hover.stickers-card,
+    .product-card:hover.frame-card {
+      transform: translateY(-12px) scale(1.05);
+    }
+
+    .product-title {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.4);
+      margin-top: 1.2rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      transition: var(--transition-smooth);
+    }
+
+    .product-card:hover .product-title {
+      color: var(--gold-light);
+    }
+
+    .product-info {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.6rem;
+      padding-top: 0.8rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .product-info .product-name-ar {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.65);
+      font-family: 'Tajawal', sans-serif;
+      transition: var(--transition-smooth);
+    }
+
+    .product-card:hover .product-name-ar {
+      color: var(--gold-light);
+    }
+
+    .product-info-placeholder {
+      width: 100%;
+      min-height: 36px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .image-wrapper {
+      width: 100%;
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .product-img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.6));
+      transition: var(--transition-smooth);
+    }
+
+    .product-card:hover .product-img {
+      transform: scale(1.08);
+    }
+
+    .fallback-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: var(--gold-primary);
+    }
+
+    .fallback-icon {
+      font-size: 2.8rem;
+      margin-bottom: 0.6rem;
+      animation: pulseFallback 2s infinite ease-in-out;
+    }
+
+    .fallback-text {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-white);
+    }
+
+    .coming-soon-badge {
+      display: inline-block;
+      background: rgba(212, 168, 75, 0.1);
+      border: 1px solid rgba(212, 168, 75, 0.25);
+      color: var(--gold-primary);
+      font-size: 0.75rem;
+      font-weight: 700;
+      font-family: 'Tajawal', sans-serif;
+      padding: 0.25rem 0.8rem;
+      border-radius: 50px;
+      letter-spacing: 1px;
+      margin-top: 0.3rem;
+      animation: pulseFallback 2.5s infinite ease-in-out;
+    }
+
+    @keyframes pulseFallback {
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 0.8;
+      }
+
+      50% {
+        transform: scale(1.12);
+        opacity: 1;
+      }
+    }
+
+    @keyframes floatMug {
+      0% {
+        transform: translateY(0);
+      }
+
+      100% {
+        transform: translateY(-16px);
+      }
+    }
+
+    @keyframes floatTshirt {
+      0% {
+        transform: translateY(0);
+      }
+
+      100% {
+        transform: translateY(-14px);
+      }
+    }
+
+    @keyframes floatCap {
+      0% {
+        transform: translateY(0);
+      }
+
+      100% {
+        transform: translateY(-15px);
+      }
+    }
+
+    @keyframes floatPillow {
+      0% {
+        transform: translateY(0);
+      }
+
+      100% {
+        transform: translateY(-12px);
+      }
+    }
+
+    @keyframes floatStickers {
+      0% {
+        transform: translateY(0);
+      }
+
+      100% {
+        transform: translateY(-18px);
+      }
+    }
+
+    @keyframes floatFrame {
+      0% {
+        transform: translateY(0);
+      }
+
+      100% {
+        transform: translateY(-13px);
+      }
+    }
+
+    /* ==========================================
+        6. القسم الأيمن: البطاقة الزجاجية ومنافذ Auth/Designer
+       ========================================== */
+    .auth-side {
+      flex: 1;
+      max-width: 480px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 440px;
+      background: var(--glass-bg);
+      border-radius: 32px;
+      padding: 3.5rem 2.2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 35px 70px rgba(0, 0, 0, 0.4),
+        0 0 80px rgba(212, 168, 75, 0.02) inset;
+      animation: floatCard 8s ease-in-out infinite alternate;
+      transition: var(--transition-smooth);
+      overflow: hidden;
+    }
+
+    .auth-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: 32px;
+      padding: 1.5px;
+      background: linear-gradient(135deg, rgba(212, 168, 75, 0.45) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(212, 168, 75, 0.05) 100%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    .auth-card:hover {
+      animation-play-state: paused;
+      transform: translateY(-8px);
+      border-color: rgba(212, 168, 75, 0.2);
+      box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
+    }
+
+    @keyframes floatCard {
+      0% {
+        transform: translateY(0);
+      }
+
+      100% {
+        transform: translateY(-12px);
+      }
+    }
+
+    /* الهيكل الداخلي للنوافذ */
+    .auth-view {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    /* شعار أزما الفاخر (logo.png) */
+    .logo-container {
+      margin-bottom: 2.2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      width: 100%;
+    }
+
+    .logo-img {
+      height: 70px;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 0 12px rgba(212, 168, 75, 0.4));
+      animation: floatLogo 4s ease-in-out infinite alternate;
+    }
+
+    @keyframes floatLogo {
+      0% {
+        transform: translateY(0) rotate(0deg);
+      }
+
+      100% {
+        transform: translateY(-5px) rotate(3deg);
+      }
+    }
+
+    .auth-title {
+      font-size: 1.85rem;
+      font-weight: 700;
+      color: var(--text-white);
+      margin-bottom: 0.6rem;
+    }
+
+    .auth-subtitle {
+      font-size: 0.95rem;
+      color: rgba(255, 255, 255, 0.45);
+      margin-bottom: 2.2rem;
+      line-height: 1.6;
+    }
+
+    /* زر جوجل */
+    .google-btn {
+      width: 100%;
+      padding: 1.15rem 1.8rem;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      color: var(--text-white);
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      transition: var(--transition-smooth);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .google-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+      transition: 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    .google-btn:hover::before {
+      left: 100%;
+    }
+
+    .google-btn:hover {
+      background: rgba(212, 168, 75, 0.08);
+      border-color: var(--gold-primary);
+      transform: scale(1.03);
+      box-shadow: 0 12px 30px rgba(212, 168, 75, 0.18);
+      color: var(--gold-light);
+    }
+
+    .google-btn svg {
+      width: 22px;
+      height: 22px;
+      transition: transform 0.4s ease;
+    }
+
+    .google-btn:hover svg {
+      transform: scale(1.1) rotate(10deg);
+    }
+
+    /* ==========================================
+       7. واجهة المصمم (Designer Form Styles)
+       ========================================== */
+    .designer-form {
+      width: 100%;
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+    }
+
+    .product-selector-label {
+      font-size: 0.95rem;
+      color: var(--gold-light);
+      font-weight: 700;
+      margin-bottom: 0.2rem;
+    }
+
+    .product-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      width: 100%;
+      margin-bottom: 0.4rem;
+    }
+
+    .prod-tab {
+      flex: 1;
+      min-width: 65px;
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 0.6rem 0.2rem;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.3rem;
+      color: rgba(255, 255, 255, 0.55);
+      transition: var(--transition-smooth);
+    }
+
+    .prod-tab:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(212, 168, 75, 0.3);
+      color: #fff;
+    }
+
+    .prod-tab.active {
+      background: rgba(212, 168, 75, 0.12);
+      border-color: var(--gold-primary);
+      color: var(--gold-light);
+      box-shadow: 0 4px 15px rgba(212, 168, 75, 0.08);
+    }
+
+    .tab-icon {
+      font-size: 1.25rem;
+    }
+
+    .tab-name {
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .form-group label {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.8);
+      font-weight: 500;
+    }
+
+    .form-group input[type="tel"],
+    .form-group input[type="text"],
+    .form-group select {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      color: #ffffff;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 0.95rem;
+      outline: none;
+      transition: var(--transition-smooth);
+    }
+
+    .form-group input[type="tel"]:focus,
+    .form-group input[type="text"]:focus,
+    .form-group select:focus {
+      border-color: var(--gold-primary);
+      background: rgba(0, 0, 0, 0.35);
+      box-shadow: 0 0 10px rgba(212, 168, 75, 0.15);
+    }
+
+    /* منطقة سحب الملفات وتأثيراتها */
+    .file-upload-box {
+      border: 2px dashed rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 1.4rem 1rem;
+      text-align: center;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(255, 255, 255, 0.005);
+      transition: var(--transition-smooth);
+    }
+
+    .file-upload-box:hover {
+      border-color: var(--gold-primary);
+      background: rgba(212, 168, 75, 0.02);
+    }
+
+    .upload-icon {
+      font-size: 1.6rem;
+      color: var(--gold-primary);
+    }
+
+    .upload-text {
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.45);
+    }
+
+    /* معاينة الصورة المرفوعة */
+    .preview-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 0.4rem;
+      padding: 0.6rem 1rem;
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 12px;
+    }
+
+    .preview-left {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    #imagePreview {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid var(--glass-border-gold);
+    }
+
+    .file-info {
+      display: flex;
+      flex-direction: column;
+      text-align: right;
+    }
+
+    .file-name {
+      font-size: 0.85rem;
+      color: #fff;
+      max-width: 180px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .file-size {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .remove-preview-btn {
+      background: transparent;
+      border: 1px solid rgba(234, 67, 53, 0.3);
+      color: #ea4335;
+      padding: 0.3rem 0.8rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .remove-preview-btn:hover {
+      background: rgba(234, 67, 53, 0.08);
+      border-color: #ea4335;
+    }
+
+    /* زر أرسل الطلب */
+    .submit-btn {
+      width: 100%;
+      padding: 1.1rem;
+      background: linear-gradient(135deg, var(--gold-primary) 0%, var(--gold-dark) 100%);
+      border: none;
+      border-radius: 16px;
+      color: #0b0a0c;
+      font-size: 1.05rem;
+      font-weight: 900;
+      font-family: 'Tajawal', sans-serif;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      box-shadow: 0 10px 25px rgba(212, 168, 75, 0.15);
+      position: relative;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 30px rgba(212, 168, 75, 0.25);
+      filter: brightness(1.08);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* ==========================================
+       8. مؤشر التحميل الكامل للبطاقة (Card Loader Overlay)
+       ========================================== */
+    .card-loader {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(11, 10, 12, 0.9);
+
+      border-radius: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      z-index: 10;
+      animation: fadeIn 0.3s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    .loader-spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid rgba(212, 168, 75, 0.1);
+      border-radius: 50%;
+      border-top-color: var(--gold-primary);
+      animation: spin 1s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+    }
+
+    .loader-text {
+      font-size: 0.95rem;
+      color: var(--gold-light);
+      font-weight: 500;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ==========================================
+       9. نظام الإشعارات الفاخر (Toast Notifications)
+       ========================================== */
+    .toast-container {
+      position: fixed;
+      top: 2rem;
+      right: 2rem;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      pointer-events: none;
+    }
+
+    .toast {
+      min-width: 320px;
+      max-width: 450px;
+      background: rgba(11, 10, 12, 0.95);
+      border: 1px solid var(--gold-primary);
+      border-radius: 16px;
+      padding: 1.2rem 1.6rem;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(212, 168, 75, 0.08);
+      transform: translateX(120%);
+      transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      pointer-events: auto;
+    }
+
+    .toast.show {
+      transform: translateX(0);
+    }
+
+    .toast-content {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      line-height: 1.4;
+      text-align: right;
+    }
+
+    .toast-icon {
+      font-size: 1.4rem;
+      color: var(--gold-primary);
+    }
+
+    .toast-close {
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.35);
+      font-size: 1.3rem;
+      cursor: pointer;
+      transition: color 0.2s;
+      line-height: 1;
+    }
+
+    .toast-close:hover {
+      color: var(--gold-primary);
+    }
+
+    /* ==========================================
+        10. صفحة التيشيرت المخصصة
+        ========================================== */
+    /* ==========================================
+        11. شريط التواصل الاجتماعي (Social Bar)
+        ========================================== */
+    .social-float {
+      position: fixed;
+      left: 20px;
+      bottom: 20px;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    .social-float.collapsed {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: rgba(212, 168, 75, 0.12);
+      border: 1px solid var(--glass-border-gold);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+      gap: 0;
+      padding: 0;
+    }
+
+    .social-float.expanded {
+      width: auto;
+      height: auto;
+      border-radius: 20px;
+      background: rgba(11, 10, 12, 0.95);
+      border: 1px solid var(--glass-border-gold);
+      padding: 0.6rem 0.5rem;
+      gap: 0.6rem;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    }
+
+    .social-float.collapsed .social-float-link {
+      position: absolute;
+      opacity: 0.5;
+    }
+
+    .social-float.collapsed .social-float-link:first-child {
+      transform: rotate(-12deg) translateY(-4px);
+    }
+
+    .social-float.collapsed .social-float-link:last-child {
+      transform: rotate(12deg) translateY(4px);
+    }
+
+    .social-float.expanded .social-float-link {
+      position: static;
+      opacity: 1;
+      transform: none;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255, 255, 255, 0.55);
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .social-float.expanded .social-float-link svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+    .social-float.expanded .social-float-link:hover {
+      color: var(--gold-primary);
+      background: rgba(212, 168, 75, 0.08);
+      border-color: var(--gold-primary);
+    }
+
+    .product-card.disabled {
+      opacity: 0.45;
+      filter: grayscale(0.8);
+      pointer-events: none;
+    }
+
+    /* ==========================================
+       واجهة التخصيص المتقدم (Advanced Customizer)
+       ========================================== */
+    .customizer-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .customizer-left,
+    .customizer-right {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    .section-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--gold-primary);
+      margin-bottom: 0.6rem;
+      letter-spacing: 0.5px;
+    }
+
+    .live-preview-container {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--glass-border-gold);
+      border-radius: 16px;
+      overflow: hidden;
+      aspect-ratio: 1 / 1;
+      max-height: 340px;
+      position: relative;
+    }
+
+    .live-preview-container canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .text-tools-section {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 1rem;
+    }
+
+    .text-input-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .text-input-row input {
+      flex: 1;
+      padding: 0.6rem 0.8rem;
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-white);
+      font-family: 'Tajawal', sans-serif;
+      font-size: 0.85rem;
+      outline: none;
+      transition: var(--transition-smooth);
+    }
+
+    .text-input-row input:focus {
+      border-color: var(--gold-primary);
+    }
+
+    .text-input-row input::placeholder {
+      color: var(--text-gray);
+    }
+
+    .tool-btn {
+      padding: 0.6rem 1rem;
+      background: linear-gradient(135deg, var(--gold-dark), var(--gold-primary));
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      font-family: 'Tajawal', sans-serif;
+      font-weight: 500;
+      transition: var(--transition-smooth);
+      white-space: nowrap;
+    }
+
+    .tool-btn:hover {
+      transform: scale(1.04);
+      box-shadow: 0 0 16px rgba(212, 168, 75, 0.3);
+    }
+
+    .text-options-row {
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 0.6rem;
+    }
+
+    .text-options-row select,
+    .text-options-row input[type="number"] {
+      padding: 0.4rem 0.5rem;
+      border: 1px solid var(--glass-border);
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-white);
+      font-family: 'Tajawal', sans-serif;
+      font-size: 0.8rem;
+      outline: none;
+    }
+
+    .text-options-row select:focus,
+    .text-options-row input[type="number"]:focus {
+      border-color: var(--gold-primary);
+    }
+
+    .text-options-row input[type="color"] {
+      width: 34px;
+      height: 34px;
+      border: 2px solid var(--glass-border);
+      border-radius: 6px;
+      cursor: pointer;
+      padding: 2px;
+      background: none;
+    }
+
+    .decorations-row {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .deco-btn {
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+
+    .deco-btn:hover {
+      border-color: var(--gold-primary);
+      background: rgba(212, 168, 75, 0.1);
+      transform: scale(1.1);
+    }
+
+    .size-qty-section {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 1rem;
+    }
+
+    .size-buttons-row {
+      display: flex;
+      gap: 0.4rem;
+      margin-bottom: 0.8rem;
+      flex-wrap: wrap;
+    }
+
+    .size-btn {
+      flex: 1;
+      min-width: 44px;
+      padding: 0.5rem 0.3rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      color: var(--text-white);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+
+    .size-btn:hover {
+      border-color: var(--gold-primary);
+    }
+
+    .size-btn.active {
+      background: linear-gradient(135deg, var(--gold-dark), var(--gold-primary));
+      border-color: var(--gold-primary);
+      color: #fff;
+      box-shadow: 0 0 12px rgba(212, 168, 75, 0.25);
+    }
+
+    .quantity-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .qty-btn {
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      color: var(--text-white);
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .qty-btn:hover {
+      border-color: var(--gold-primary);
+      background: rgba(212, 168, 75, 0.1);
+    }
+
+    .qty-value {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-white);
+      min-width: 30px;
+      text-align: center;
+    }
+
+    .price-display {
+      margin-right: auto;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--gold-primary);
+      background: rgba(212, 168, 75, 0.1);
+      padding: 0.3rem 0.8rem;
+      border-radius: 8px;
+    }
+
+    .advanced-settings-section {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 1.2rem;
+    }
+
+    .setting-group {
+      margin-bottom: 1rem;
+    }
+
+    .setting-group label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--text-gray);
+      margin-bottom: 0.4rem;
+      font-weight: 500;
+    }
+
+    .color-picker-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .color-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+    }
+
+    .color-btn:hover {
+      transform: scale(1.12);
+    }
+
+    .color-btn.active {
+      border-color: var(--gold-primary);
+      box-shadow: 0 0 0 2px var(--gold-primary), 0 0 12px rgba(212, 168, 75, 0.3);
+    }
+
+    .setting-select {
+      width: 100%;
+      padding: 0.55rem 0.7rem;
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-white);
+      font-family: 'Tajawal', sans-serif;
+      font-size: 0.85rem;
+      outline: none;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+
+    .setting-select:focus {
+      border-color: var(--gold-primary);
+    }
+
+    .setting-select option {
+      background: #1a1a1e;
+      color: #fff;
+    }
+
+    .print-type-row {
+      display: flex;
+      gap: 0.4rem;
+    }
+
+    .print-btn {
+      flex: 1;
+      padding: 0.5rem 0.4rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      color: var(--text-white);
+      font-size: 0.78rem;
+      font-family: 'Tajawal', sans-serif;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      font-weight: 500;
+    }
+
+    .print-btn:hover {
+      border-color: var(--gold-primary);
+    }
+
+    .print-btn.active {
+      background: linear-gradient(135deg, var(--gold-dark), var(--gold-primary));
+      border-color: var(--gold-primary);
+      color: #fff;
+    }
+
+    .save-settings-btn {
+      width: 100%;
+      padding: 0.6rem;
+      background: transparent;
+      border: 1px dashed var(--gold-primary);
+      border-radius: 10px;
+      color: var(--gold-primary);
+      font-family: 'Tajawal', sans-serif;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      font-weight: 500;
+    }
+
+    .save-settings-btn:hover {
+      background: rgba(212, 168, 75, 0.08);
+      border-style: solid;
+    }
+
+    .upload-section {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 1rem;
+    }
+
+    /* ==========================================
+        11. توافق الشاشات والاستجابة (Responsiveness)
+        ========================================== */
+    @media (max-width: 968px) {
+      .navbar {
+        padding: 1rem 2rem;
+      }
+
+      .app-container {
+        padding: 7rem 2rem 2rem 2rem;
+      }
+
+      .split-layout {
+        flex-direction: column;
+        gap: 3rem;
+        text-align: center;
+      }
+
+      .showcase-side {
+        align-items: center;
+        text-align: center;
+        width: 100%;
+      }
+
+      .main-title {
+        font-size: 2.8rem;
+      }
+
+      .description {
+        font-size: 1.05rem;
+        max-width: 100%;
+        margin-bottom: 1.5rem;
+      }
+
+      .products-preview {
+        gap: 1.2rem;
+      }
+
+      .pyramid-row {
+        gap: 1.2rem;
+      }
+
+      .product-card {
+        max-width: 180px;
+        padding: 1.3rem 1rem 1rem;
+      }
+
+      .image-wrapper {
+        height: 140px;
+      }
+
+      .auth-side {
+        width: 100%;
+      }
+
+      .auth-card {
+        max-width: 500px;
+        padding: 3rem 2rem;
+      }
+
+    }
+
+    @media (max-width: 540px) {
+      .main-title {
+        font-size: 2.6rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .navbar {
+        padding: 0.8rem 1.2rem;
+      }
+
+      .nav-brand-text {
+        font-size: 1.4rem;
+      }
+
+      .app-container {
+        padding: 6rem 1.2rem 2rem 1.2rem;
+      }
+
+      .main-title {
+        font-size: 2.2rem;
+      }
+
+      .royal-badge {
+        font-size: 0.85rem;
+        padding: 0.5rem 1.1rem;
+      }
+
+      .products-preview {
+        gap: 0.9rem;
+      }
+
+      .pyramid-row {
+        flex-wrap: wrap;
+        gap: 0.8rem;
+      }
+
+      .product-card {
+        max-width: 140px;
+        padding: 0.8rem;
+        border-radius: 18px;
+      }
+
+      .product-card::before {
+        border-radius: 18px;
+      }
+
+      .product-info .product-name-ar {
+        font-size: 0.78rem;
+      }
+
+      .coming-soon-badge {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.6rem;
+      }
+
+      .image-wrapper {
+        height: 110px;
+      }
+
+      .fallback-icon {
+        font-size: 2.2rem;
+      }
+
+      .fallback-text {
+        font-size: 0.9rem;
+      }
+
+      .auth-card {
+        padding: 2.5rem 1.2rem;
+        border-radius: 24px;
+      }
+
+      .auth-card::before {
+        border-radius: 24px;
+      }
+
+      .auth-title {
+        font-size: 1.45rem;
+      }
+
+      .google-btn {
+        padding: 1rem 1.2rem;
+        font-size: 0.95rem;
+        border-radius: 14px;
+      }
+
+      .prod-tab {
+        min-width: 55px;
+        padding: 0.5rem 0.1rem;
+      }
+
+      .tab-icon {
+        font-size: 1.1rem;
+      }
+
+      .tab-name {
+        font-size: 0.7rem;
+      }
+
+      .submit-btn {
+        padding: 1rem;
+        font-size: 1rem;
+        border-radius: 14px;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .main-title {
+        font-size: 1.8rem;
+      }
+
+      .nav-brand-text {
+        font-size: 1.2rem;
+      }
+
+      .app-container {
+        padding: 5rem 0.8rem 1.5rem 0.8rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .customizer-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .live-preview-container {
+        max-height: 260px;
+      }
+
+      .size-btn {
+        min-width: 38px;
+        padding: 0.4rem 0.2rem;
+        font-size: 0.75rem;
+      }
+
+      .text-options-row select,
+      .text-options-row input[type="number"] {
+        font-size: 0.75rem;
+        padding: 0.3rem 0.4rem;
+      }
+
+      .color-btn {
+        width: 30px;
+        height: 30px;
+      }
+
+      .print-btn {
+        font-size: 0.72rem;
+        padding: 0.4rem 0.3rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- لوحة الجسيمات العائمة الخلفية (النجوم والغبار) -->
+  <canvas id="particles-canvas"></canvas>
+
+  <!-- طبقة الكرات الضوئية الخلفية الملونة -->
+  <div class="orbs-container">
+    <div class="orb orb-gold"></div>
+    <div class="orb orb-dark-brown"></div>
+    <div class="orb orb-copper"></div>
+  </div>
+
+  <!-- [تعديل الاسم] شريط التنقل الزجاجي الثابت في الأعلى -->
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="nav-brand-wrapper">
+        <!-- [تعديل الصورة] يمكنك استبدال logo.png لاحقاً -->
+        <img src="logo.png" alt="أزما" class="nav-logo-img" onerror="this.style.display='none'">
+        <span class="nav-brand-text">أزمـا</span>
+      </div>
+      <div class="nav-actions">
+        <button class="hamburger-btn" id="hamburgerBtn" aria-label="القائمة">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <!-- زر تسجيل الخروج، يظهر بعد تسجيل الدخول فقط -->
+        <button class="logout-btn" id="navLogoutBtn" style="display: none;">تسجيل الخروج</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- قائمة المنتجات المنبثقة -->
+  <div class="product-menu-overlay" id="productMenuOverlay">
+    <div class="product-menu">
+      <button class="menu-close-btn" id="menuCloseBtn">←</button>
+      <div class="menu-items" id="menuItems">
+        <a href="https://t.me/n8nhassenbot" target="_blank" class="menu-item" id="contactCustomerBtn">
+          <span class="menu-item-icon">📞</span>
+          <span class="menu-item-name">تواصل مع عميل</span>
+        </a>
+        <div class="menu-divider"></div>
+        <a href="#" class="menu-item menu-toggle" id="langToggleBtn">
+          <span class="menu-item-icon">🇸🇦</span>
+          <span class="menu-item-name">اللغة: عربي</span>
+        </a>
+        <a href="#" class="menu-item" id="valuesBtn">
+          <span class="menu-item-icon">💎</span>
+          <span class="menu-item-name">قيمنا</span>
+        </a>
+        <a href="#" class="menu-item menu-toggle" id="themeToggleBtn">
+          <span class="menu-item-icon">🌙</span>
+          <span class="menu-item-name">الوضع: ليلي</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- حاوية الإشعارات المتطورة -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- حاوية التطبيق الرئيسية -->
+  <div class="app-container">
+
+    <!-- تخطيط الصفحة المنقسم -->
+    <main class="split-layout">
+
+      <!-- الجهة اليسرى: لوحة عرض منتجات أزما -->
+      <section class="showcase-side reveal-up delay-1">
+
+        <h1 class="main-title"
+          style="text-align: center; width: 100%; font-size: 5rem; letter-spacing: 8px; text-shadow: 0 0 40px rgba(212, 168, 75, 0.3);">
+          <span class="gold-gradient">AZMA</span>
+        </h1>
+
+
+
+        <div class="products-preview">
+
+          <!-- ===== الصف الأول (القمة): تيشيرت 👕 ===== -->
+          <div class="pyramid-row">
+            <div class="product-card tshirt-card" onclick="location.href='tshirt-preview.html'" style="cursor:pointer;">
+              <div class="image-wrapper">
+                <img src="tshirt.png" alt="تيشيرت أزما الفاخر" class="product-img"
+                  onerror="handleImageError(this, 'تيشيرت أزما')">
+              </div>
+              <div class="product-title">Luxury T-Shirt</div>
+            </div>
+          </div>
+
+          <!-- ===== الصف الثاني (الوسط): كوب ☕ + طاقية 🧢 ===== -->
+          <div class="pyramid-row">
+            <div class="product-card mug-card" onclick="location.href='mug-preview.html'" style="cursor:pointer;">
+              <div class="image-wrapper">
+                <img src="mug.png" alt="كوب أزما الفاخر" class="product-img"
+                  onerror="handleImageError(this, 'كوب أزما')">
+              </div>
+              <div class="product-title">Premium Mug</div>
+            </div>
+
+            <div class="product-card cap-card" onclick="location.href='cap-preview.html'" style="cursor:pointer;">
+              <div class="image-wrapper">
+                <img src="cap.png" alt="طاقية أزما الفاخرة" class="product-img"
+                  onerror="handleImageError(this, 'طاقية أزما')">
+              </div>
+              <div class="product-title">Luxury Cap</div>
+            </div>
+          </div>
+
+          <!-- ===== الصف الثالث (القاعدة): ملصقات 🏷️ + مخدة 🛏️ + برواز 🖼️ ===== -->
+          <div class="pyramid-row">
+            <div class="product-card stickers-card" onclick="location.href='3d-designer.html?product=stickers'"
+              style="cursor:pointer;">
+              <div class="image-wrapper">
+                <img src="stickers.png" alt="ملصقات أزما الفاخرة" class="product-img"
+                  onerror="handleImageError(this, 'ملصقات أزما')">
+              </div>
+              <div class="product-title">Premium Stickers</div>
+            </div>
+
+            <div class="product-card pillow-card" onclick="location.href='3d-designer.html?product=pillow'"
+              style="cursor:pointer;">
+              <div class="image-wrapper">
+                <img src="pillow.png" alt="مخدة أزما الفاخرة" class="product-img"
+                  onerror="handleImageError(this, 'مخدة أزما')">
+              </div>
+              <div class="product-title">Luxury Pillow</div>
+            </div>
+
+            <!-- بطاقة البرواز 🖼️ — منتج مؤقت (Placeholder) -->
+            <div class="product-card frame-card" style="cursor:default;">
+              <div class="image-wrapper">
+                <div class="fallback-placeholder">
+                  <div class="fallback-icon">🖼️</div>
+                  <div class="fallback-text" style="color: var(--gold-primary);">برواز أزما</div>
+                </div>
+              </div>
+              <div class="product-title">Coming Soon</div>
+              <div class="product-info">
+                <span class="product-name-ar">برواز فاخر 🖼️</span>
+                <div class="product-info-placeholder" data-product="frame">
+                  <span class="coming-soon-badge">قريباً...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- الجهة اليمنى: بوابة الدخول ونماذج التصميم المتفاعلة مع Firebase -->
+      <section class="auth-side">
+
+        <div class="auth-card reveal-up delay-2">
+
+          <!-- مؤشر تحميل التخزين والإرسال (Loader) -->
+          <div class="card-loader" id="cardLoader" style="display: none;">
+            <div class="loader-spinner"></div>
+            <span class="loader-text">جاري رفع الملف وإرسال الطلب...</span>
+          </div>
+
+          <!-- ==========================================
+               الحالة الأولى: نموذج تسجيل الدخول (Auth View)
+               ========================================== -->
+          <div id="auth-login-view" class="auth-view">
+            <!-- [تعديل الصورة] شعار أزما الفاخر -->
+            <div class="logo-container">
+              <img src="logo.png" alt="أزما" class="logo-img" id="authLogoImg" onerror="handleLogoError(this)">
+            </div>
+
+            <h2 class="auth-title">بوابة الدخول</h2>
+            <!-- [تعديل الاسم] تغيير الاسم إلى أزما -->
+            <p class="auth-subtitle">سجل للإبحار في عالم التصميم الفاخر مع أزما</p>
+
+            <!-- زر المتابعة باستخدام Google -->
+            <button class="google-btn" type="button" id="googleLoginBtn">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  fill="#4285F4" />
+                <path
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  fill="#34A853" />
+                <path
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                  fill="#FBBC05" />
+                <path
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                  fill="#EA4335" />
+              </svg>
+              <span>المتابعة باستخدام Google</span>
+            </button>
+          </div>
+
+          <!-- ==========================================
+               الحالة الثانية: واجهة المصمم (Designer Interface)
+               ========================================== -->
+          <div id="auth-designer-view" class="auth-view" style="display: none; text-align: right;">
+
+            <h2 class="auth-title" id="welcomeUserText" style="width: 100%; text-align: center;">مرحباً بك، صمم منتجك ✨
+            </h2>
+            <p class="auth-subtitle" style="width: 100%; text-align: center;">صنع الخيال على المنتجات الفاخرة يبدأ من
+              هنا</p>
+
+            <form id="designerForm" class="designer-form">
+
+              <!-- اختيار نوع المنتج -->
+              <div class="form-group">
+                <div class="product-selector-label">اختر المنتج المراد تصميمه:</div>
+                <div class="product-tabs">
+                  <button type="button" class="prod-tab active" data-product="tshirt">
+                    <span class="tab-icon">👕</span>
+                    <span class="tab-name">تيشيرت</span>
+                  </button>
+                  <button type="button" class="prod-tab" data-product="mug">
+                    <span class="tab-icon">☕</span>
+                    <span class="tab-name">كوب</span>
+                  </button>
+                  <button type="button" class="prod-tab" data-product="cap">
+                    <span class="tab-icon">🧢</span>
+                    <span class="tab-name">طاقية</span>
+                  </button>
+                  <button type="button" class="prod-tab" data-product="pillow">
+                    <span class="tab-icon">🛏️</span>
+                    <span class="tab-name">مخدة</span>
+                  </button>
+                  <button type="button" class="prod-tab" data-product="stickers">
+                    <span class="tab-icon">🏷️</span>
+                    <span class="tab-name">ملصقات</span>
+                  </button>
+                </div>
+                <!-- واجهة التخصيص المتقدم -->
+                <div class="customizer-grid">
+
+                  <!-- العمود الأيسر: معاينة + أدوات -->
+                  <div class="customizer-left">
+
+                    <!-- 1. المعاينة الحية -->
+                    <div class="live-preview-container">
+                      <canvas id="livePreviewCanvas"></canvas>
+                    </div>
+
+                    <!-- 2. رفع الصورة -->
+                    <div class="upload-section">
+                      <div class="section-label">📤 رفع الصورة</div>
+                      <div class="file-upload-box" id="fileUploadBox">
+                        <span class="upload-icon">📤</span>
+                        <span class="upload-text">اضغط هنا أو اسحب الملف لرفع التصميم</span>
+                        <input type="file" id="designFileInput" accept="image/*" required style="display:none;">
+                      </div>
+                      <div class="preview-container" id="imagePreviewContainer" style="display: none;">
+                        <div class="preview-left">
+                          <img id="imagePreview" src="" alt="معاينة التصميم">
+                          <div class="file-info">
+                            <span class="file-name" id="previewFileName">اسم الملف.png</span>
+                            <span class="file-size" id="previewFileSize">250 KB</span>
+                          </div>
+                        </div>
+                        <button type="button" class="remove-preview-btn" id="removePreviewBtn">إزالة</button>
+                      </div>
+                    </div>
+
+                    <!-- 3. النص والزخرفة -->
+                    <div class="text-tools-section">
+                      <div class="section-label">✍️ النص والزخرفة</div>
+                      <div class="text-input-row">
+                        <input type="text" id="designTextInput" placeholder="أكتب الكلمة أو العبارة المطلوبة...">
+                        <button type="button" class="tool-btn" id="addTextBtn">➕ إضافة</button>
+                      </div>
+                      <div class="text-options-row">
+                        <select id="textFontSelect">
+                          <option value="Tajawal">Tajawal</option>
+                          <option value="Outfit">Outfit</option>
+                          <option value="Arial">Arial</option>
+                          <option value="Noto Naskh Arabic">Noto Naskh</option>
+                        </select>
+                        <input type="number" id="textSizeInput" value="28" min="8" max="120" title="حجم الخط">
+                        <input type="color" id="textColorInput" value="#d4a84b" title="لون النص">
+                        <select id="textAngleSelect" title="زاوية النص">
+                          <option value="0">0°</option>
+                          <option value="15">15°</option>
+                          <option value="30">30°</option>
+                          <option value="45">45°</option>
+                          <option value="-15">-15°</option>
+                          <option value="-30">-30°</option>
+                          <option value="-45">-45°</option>
+                        </select>
+                      </div>
+                      <div class="decorations-row">
+                        <button type="button" class="deco-btn" data-deco="star" title="نجمة">⭐</button>
+                        <button type="button" class="deco-btn" data-deco="circle" title="دائرة">⭕</button>
+                        <button type="button" class="deco-btn" data-deco="frame" title="إطار">◻️</button>
+                        <button type="button" class="deco-btn" data-deco="leaf" title="ورقة نباتية">🌿</button>
+                        <button type="button" class="deco-btn" data-deco="diamond" title="ماسة">💎</button>
+                        <button type="button" class="deco-btn" data-deco="heart" title="قلب">❤️</button>
+                      </div>
+                      <div id="addedTextsList" style="margin-top:0.5rem;display:flex;flex-wrap:wrap;gap:0.3rem;"></div>
+                    </div>
+
+                    <!-- 4. المقاس والكمية -->
+                    <div class="size-qty-section">
+                      <div class="section-label">📏 المقاس والكمية</div>
+                      <div class="size-buttons-row">
+                        <button type="button" class="size-btn" data-size="S">S</button>
+                        <button type="button" class="size-btn" data-size="M">M</button>
+                        <button type="button" class="size-btn active" data-size="L">L</button>
+                        <button type="button" class="size-btn" data-size="XL">XL</button>
+                        <button type="button" class="size-btn" data-size="2X">2X</button>
+                      </div>
+                      <div class="quantity-row">
+                        <button type="button" class="qty-btn" id="qtyMinus">−</button>
+                        <span class="qty-value" id="qtyValue">1</span>
+                        <button type="button" class="qty-btn" id="qtyPlus">+</button>
+                        <span class="price-display" id="totalPriceDisplay">د.أ 0</span>
+                      </div>
+                    </div>
+
+                  </div>
+
+                  <!-- العمود الأيمن: إعدادات + زر الطلب -->
+                  <div class="customizer-right">
+
+                    <!-- 5. حقل رقم الجوال -->
+                    <div class="form-group" style="margin-bottom:0.8rem;">
+                      <label>📞 رقم الجوال (مطلوب):</label>
+                      <input type="tel" id="userPhoneInput" placeholder="05xxxxxxxx" required pattern="^05\d{8}$"
+                        title="يرجى إدخال رقم جوال سعودي صحيح"
+                        style="width:100%;padding:0.6rem 0.8rem;border:1px solid var(--glass-border);border-radius:8px;background:rgba(255,255,255,0.04);color:var(--text-white);font-family:'Tajawal',sans-serif;font-size:0.85rem;outline:none;transition:var(--transition-smooth);">
+                    </div>
+
+                    <!-- 6. الإعدادات المتقدمة -->
+                    <div class="advanced-settings-section">
+                      <div class="section-label">⚙️ الإعدادات المتقدمة</div>
+
+                      <!-- ألوان المنتج -->
+                      <div class="setting-group">
+                        <label>لون المنتج:</label>
+                        <div class="color-picker-row">
+                          <button type="button" class="color-btn active" data-color="black" style="background:#000"
+                            title="أسود"></button>
+                          <button type="button" class="color-btn" data-color="white" style="background:#fff"
+                            title="أبيض"></button>
+                          <button type="button" class="color-btn" data-color="gold" style="background:#d4a84b"
+                            title="ذهبي"></button>
+                          <button type="button" class="color-btn" data-color="gray" style="background:#666"
+                            title="رمادي"></button>
+                          <button type="button" class="color-btn" data-color="red" style="background:#c0392b"
+                            title="أحمر"></button>
+                          <button type="button" class="color-btn" data-color="blue" style="background:#2980b9"
+                            title="أزرق"></button>
+                        </div>
+                      </div>
+
+                      <!-- الخامة -->
+                      <div class="setting-group">
+                        <label>نوع الخامة:</label>
+                        <select id="materialSelect" class="setting-select">
+                          <option value="cotton">قطن فاخر (Cotton)</option>
+                          <option value="polyester">بوليستر (Polyester)</option>
+                          <option value="velvet">مخمل (Velvet)</option>
+                          <option value="satin">ساتان (Satin)</option>
+                          <option value="linen">كتان (Linen)</option>
+                        </select>
+                      </div>
+
+                      <!-- نوع الطباعة -->
+                      <div class="setting-group">
+                        <label>نوع الطباعة:</label>
+                        <div class="print-type-row">
+                          <button type="button" class="print-btn active" data-print="heat">🔥 حرارية</button>
+                          <button type="button" class="print-btn" data-print="embroidery">🧵 تطريز</button>
+                          <button type="button" class="print-btn" data-print="digital">🖨️ رقمية</button>
+                        </div>
+                      </div>
+
+                      <!-- خيارات المنتج الديناميكية -->
+                      <div class="setting-group" id="dynamicOptionsGroup" style="gap:0;">
+                      </div>
+
+                      <!-- حفظ الإعدادات الافتراضية -->
+                      <button type="button" class="save-settings-btn" id="saveProductDefaultsBtn">💾 حفظ كإعدادات
+                        افتراضية للمنتج</button>
+                    </div>
+
+                    <!-- 7. زر الطلب -->
+                    <button class="submit-btn" type="submit" id="submitOrderBtn">
+                      <span class="btn-text">🛒 أرسل الطلب</span>
+                    </button>
+
+                  </div>
+                </div>
+
+            </form>
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- أيقونات التواصل العائمة على اليسار -->
+    <div class="social-float collapsed" id="socialFloat">
+
+      <a href="https://www.instagram.com/a_z_m_a9?igsh=b3NtcHByeG5hbGZv" target="_blank" rel="noopener noreferrer"
+        class="social-float-link" aria-label="Instagram">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z" />
+        </svg>
+      </a>
+
+      <a href="https://www.facebook.com/profile.php?id=61575938132393" target="_blank" rel="noopener noreferrer"
+        class="social-float-link" aria-label="Facebook">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c4.56-.93 8-4.96 8-9.75z" />
+        </svg>
+      </a>
+
+    </div>
+
+    <p
+      style="text-align: center; color: rgba(255,255,255,0.5); font-size: 1.1rem; margin-top: 1.5rem; line-height: 1.8; font-family: 'Tajawal', sans-serif;">
+      صمّم اللي ببالك، وبنوصلك إياه لعند بابك
+    </p>
+
+
+
+  </div>
+
+  <!-- مكتبات Firebase Compatibility SDK (الإصدار التاسع المتوافق) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+
+  <!-- [تعديل المفاتيح] استدعاء ملف التهيئة المستقل لوضع مفاتيحك فيه لاحقاً -->
+  <script src="firebase-config.js"></script>
+
+  <script>
+    /* ==========================================
+       12. جافاسكريبت للجسيمات وجزيئات الغبار العائمة
+       ========================================== */
+    function initParticles() {
+      const canvas = document.getElementById('particles-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      let particles = [];
+      const count = 15; // عدد الجسيمات ليكون خفيفاً وأنيقاً
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      class Particle {
+        constructor() {
+          this.x = Math.random() * canvas.width;
+          this.y = Math.random() * canvas.height;
+          this.size = Math.random() * 2 + 0.6;
+          this.speedX = (Math.random() - 0.5) * 0.15;
+          this.speedY = -Math.random() * 0.3 - 0.08; // الصعود للأعلى ببطء شديد
+          this.color = Math.random() > 0.5 ? 'rgba(212, 168, 75, 0.25)' : 'rgba(255, 255, 255, 0.18)';
+        }
+
+        update() {
+          this.x += this.speedX;
+          this.y += this.speedY;
+
+          // حدود الشاشة لتدوير الجسيمات
+          if (this.x > canvas.width) this.x = 0;
+          if (this.x < 0) this.x = canvas.width;
+          if (this.y < 0) {
+            this.y = canvas.height;
+            this.x = Math.random() * canvas.width;
+          }
+        }
+
+        draw() {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fillStyle = this.color;
+          ctx.fill();
+        }
+      }
+
+      for (let i = 0; i < count; i++) {
+        particles.push(new Particle());
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+          p.update();
+          p.draw();
+        });
+        requestAnimationFrame(animate);
+      }
+      animate();
+    }
+
+    /* ==========================================
+       13. إدارة الخطأ وبدائل تحميل الصور الفاخرة
+       ========================================== */
+    function handleImageError(imgElement, fallbackText) {
+      const container = imgElement.parentElement;
+      container.innerHTML = `
+        <div class="fallback-placeholder">
+          <div class="fallback-icon">💎</div>
+          <div class="fallback-text">${fallbackText}</div>
+          <span style="font-size: 0.75rem; color: rgba(212,168,75,0.4); margin-top: 5px;">أزما</span>
+        </div>
+      `;
+    }
+
+    function handleLogoError(imgElement) {
+      imgElement.style.display = 'none';
+      const container = imgElement.parentElement;
+      if (!container.querySelector('.logo-text-placeholder')) {
+        container.insertAdjacentHTML('beforeend', `
+          <span class="logo-text-placeholder" style="font-size: 2.4rem; font-weight: 900; background: linear-gradient(135deg, #ffffff 0%, var(--gold-primary) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 3px;">أزمـا</span>
+        `);
+      }
+    }
+
+    /* ==========================================
+       14. نظام الإشعارات المنبثقة الفاخر (Toast API)
+       ========================================== */
+    function showToast(message, icon = '📦') {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `
+        <div class="toast-content">
+          <span class="toast-icon">${icon}</span>
+          <span>${message}</span>
+        </div>
+        <button class="toast-close" type="button">&times;</button>
+      `;
+
+      container.appendChild(toast);
+
+      // إطلاق الأنيميشن
+      setTimeout(() => toast.classList.add('show'), 50);
+
+      // التخلص التلقائي
+      const autoClose = setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 500);
+      }, 4000);
+
+      // الإغلاق اليدوي
+      toast.querySelector('.toast-close').addEventListener('click', () => {
+        clearTimeout(autoClose);
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 500);
+      });
+    }
+
+    /* ==========================================
+        15. خيارات وحقول نموذج مصمم المنتجات التفاعلي
+        ========================================== */
+    const productOptions = {
+      tshirt: [
+        {
+          id: "tshirt_size", label: "المقاس:", options: [
+            { value: "S", text: "S - صغير" }, { value: "M", text: "M - متوسط" },
+            { value: "L", text: "L - كبير" }, { value: "XL", text: "XL - كبير جداً" },
+            { value: "XXL", text: "XXL - كبير مضاعف" }
+          ]
+        },
+        {
+          id: "tshirt_color", label: "اللون:", options: [
+            { value: "black", text: "أسود ملكي" }, { value: "white", text: "أبيض ناصع" },
+            { value: "gold", text: "ذهبي فاخر" }, { value: "dark_gray", text: "رمادي غامق" }
+          ]
+        }
+      ],
+      mug: [
+        {
+          id: "mug_type", label: "النوع:", options: [
+            { value: "black_ceramic", text: "سيراميك أسود فاخر" },
+            { value: "magic_mug", text: "كوب سحري (يتغير مع الحرارة)" },
+            { value: "clear_glass", text: "زجاج شفاف متين" }
+          ]
+        },
+        {
+          id: "mug_capacity", label: "السعة:", options: [
+            { value: "300ml", text: "300 مل" }, { value: "400ml", text: "400 مل" },
+            { value: "500ml", text: "500 مل" }
+          ]
+        }
+      ],
+      cap: [
+        {
+          id: "cap_color", label: "اللون:", options: [
+            { value: "black", text: "أسود ملكي" }, { value: "white", text: "أبيض ناصع" },
+            { value: "beige", text: "بيج" }, { value: "dark_red", text: "أحمر غامق" },
+            { value: "navy_blue", text: "أزرق بحري" }
+          ]
+        },
+        {
+          id: "cap_size", label: "المقاس:", options: [
+            { value: "M", text: "M - متوسط" }, { value: "L", text: "L - كبير" },
+            { value: "XL", text: "XL - كبير جداً" }
+          ]
+        }
+      ],
+      pillow: [
+        {
+          id: "pillow_fabric", label: "نوع القماش:", options: [
+            { value: "velvet", text: "مخمل فاخر (Velvet)" },
+            { value: "satin", text: "ساتان ناعم (Satin)" },
+            { value: "linen", text: "كتان طبيعي (Linen)" }
+          ]
+        },
+        {
+          id: "pillow_size", label: "المقاس:", options: [
+            { value: "40x40", text: "40x40 سم" }, { value: "45x45", text: "45x45 سم" },
+            { value: "50x50", text: "50x50 سم" }
+          ]
+        },
+        {
+          id: "pillow_fill", label: "نوع الحشوة:", options: [
+            { value: "polyester", text: "بوليستر" }, { value: "memory_foam", text: "فوم ذكي" },
+            { value: "down", text: "ريش طبيعي" }
+          ]
+        }
+      ],
+      stickers: [
+        {
+          id: "sticker_type", label: "نوع الملصق:", options: [
+            { value: "clear", text: "شفاف" }, { value: "white", text: "أبيض" },
+            { value: "gold", text: "ذهبي" }
+          ]
+        },
+        {
+          id: "sticker_quantity", label: "العدد:", options: [
+            { value: "10", text: "10 ملصقات" }, { value: "25", text: "25 ملصقاً" },
+            { value: "50", text: "50 ملصقاً" }, { value: "100", text: "100 ملصق (أفضل قيمة)" }
+          ]
+        }
+      ]
+    };
+
+    let selectedProduct = 'tshirt';
+    let selectedSize = 'L';
+    let selectedColor = 'black';
+    let selectedPrint = 'heat';
+    let orderQuantity = 1;
+    let addedTexts = [];
+    let addedDecorations = [];
+    let uploadedImage = null;
+
+    const productBasePrices = { tshirt: 120, mug: 45, cap: 35, pillow: 60, stickers: 20 };
+    const sizeMultipliers = { S: 0.85, M: 0.95, L: 1, XL: 1.15, '2X': 1.3 };
+
+    function updateDynamicOptions(productType) {
+      const selectGroup = document.getElementById('dynamicOptionsGroup');
+      if (!selectGroup) return;
+      const configArr = productOptions[productType];
+      if (!configArr || configArr.length === 0) { selectGroup.style.display = 'none'; return; }
+      selectGroup.style.display = 'block';
+      selectGroup.innerHTML = '';
+      configArr.forEach(config => {
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'margin-bottom:0.7rem;';
+        const label = document.createElement('label');
+        label.textContent = config.label;
+        label.style.cssText = 'display:block;font-size:0.8rem;color:var(--text-gray);margin-bottom:0.3rem;font-weight:500;';
+        const select = document.createElement('select');
+        select.id = config.id;
+        select.className = 'setting-select';
+        select.dataset.label = config.label;
+        config.options.forEach(opt => {
+          const option = document.createElement('option');
+          option.value = opt.value;
+          option.textContent = opt.text;
+          select.appendChild(option);
+        });
+        select.addEventListener('change', updatePrice);
+        wrapper.appendChild(label);
+        wrapper.appendChild(select);
+        selectGroup.appendChild(wrapper);
+      });
+    }
+
+    function calculateTotalPrice() {
+      const base = productBasePrices[selectedProduct] || 100;
+      const multiplier = sizeMultipliers[selectedSize] || 1;
+      return (base * multiplier * orderQuantity).toFixed(2);
+    }
+
+    function updatePrice() {
+      const el = document.getElementById('totalPriceDisplay');
+      if (el) el.textContent = 'د.أ ' + calculateTotalPrice();
+    }
+
+    function drawPreview() {
+      const canvas = document.getElementById('livePreviewCanvas');
+      if (!canvas) return;
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const w = rect.width || 300;
+      const h = rect.height || 300;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      canvas.style.width = w + 'px';
+      canvas.style.height = h + 'px';
+      const ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+
+      const grad = ctx.createLinearGradient(0, 0, w, h);
+      grad.addColorStop(0, '#1a1a1e');
+      grad.addColorStop(1, '#0d0d0f');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.fillStyle = selectedColor === 'white' ? '#f0f0f0' : selectedColor === 'gold' ? '#d4a84b' : selectedColor === 'gray' ? '#555' : selectedColor === 'red' ? '#8b2a1e' : selectedColor === 'blue' ? '#1a5276' : '#222';
+      ctx.beginPath();
+      if (selectedProduct === 'mug') {
+        ctx.roundRect(w * 0.15, h * 0.1, w * 0.7, h * 0.8, 12);
+      } else if (selectedProduct === 'cap') {
+        ctx.roundRect(w * 0.1, h * 0.3, w * 0.8, h * 0.55, 40);
+      } else if (selectedProduct === 'pillow') {
+        ctx.roundRect(w * 0.08, h * 0.08, w * 0.84, h * 0.84, 20);
+      } else if (selectedProduct === 'stickers') {
+        ctx.roundRect(w * 0.12, h * 0.12, w * 0.76, h * 0.76, 4);
+      } else {
+        ctx.roundRect(w * 0.08, h * 0.05, w * 0.84, h * 0.9, 14);
+      }
+      ctx.fill();
+
+      if (uploadedImage && uploadedImage.complete) {
+        ctx.save();
+        ctx.beginPath();
+        if (selectedProduct === 'mug') ctx.roundRect(w * 0.2, h * 0.15, w * 0.6, h * 0.7, 8);
+        else if (selectedProduct === 'cap') ctx.roundRect(w * 0.15, h * 0.35, w * 0.7, h * 0.45, 30);
+        else if (selectedProduct === 'pillow') ctx.roundRect(w * 0.12, h * 0.12, w * 0.76, h * 0.76, 14);
+        else if (selectedProduct === 'stickers') ctx.roundRect(w * 0.15, h * 0.15, w * 0.7, h * 0.7, 3);
+        else ctx.roundRect(w * 0.12, h * 0.1, w * 0.76, h * 0.6, 10);
+        ctx.clip();
+        const iw = w * 0.7, ih = h * 0.55;
+        ctx.drawImage(uploadedImage, (w - iw) / 2, h * 0.1, iw, ih);
+        ctx.restore();
+      }
+
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      addedTexts.forEach(t => {
+        ctx.save();
+        ctx.translate(w / 2, h / 2 + (addedTexts.indexOf(t) - (addedTexts.length - 1) / 2) * 40);
+        ctx.rotate((t.angle || 0) * Math.PI / 180);
+        ctx.font = '700 ' + (t.size || 28) + 'px ' + (t.font || 'Tajawal') + ', sans-serif';
+        ctx.fillStyle = t.color || '#d4a84b';
+        ctx.shadowColor = 'rgba(0,0,0,0.5)';
+        ctx.shadowBlur = 6;
+        ctx.fillText(t.text, 0, 0);
+        ctx.restore();
+      });
+
+      addedDecorations.forEach(d => {
+        ctx.save();
+        ctx.fillStyle = d.color || '#d4a84b';
+        ctx.globalAlpha = 0.85;
+        const x = w * (0.15 + Math.random() * 0.7);
+        const y = h * (0.15 + Math.random() * 0.7);
+        const s = (d.size || 16) * (w / 300);
+        if (d.type === 'star') {
+          drawStar(ctx, x, y, 5, s, s / 2);
+        } else if (d.type === 'circle') {
+          ctx.beginPath(); ctx.arc(x, y, s / 2, 0, Math.PI * 2); ctx.fill();
+        } else if (d.type === 'frame') {
+          ctx.strokeStyle = d.color || '#d4a84b';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(w * 0.05, h * 0.05, w * 0.9, h * 0.9);
+        } else if (d.type === 'leaf') {
+          ctx.font = s + 'px sans-serif'; ctx.fillText('🌿', x, y);
+        } else if (d.type === 'diamond') {
+          ctx.font = s + 'px sans-serif'; ctx.fillText('💎', x, y);
+        } else if (d.type === 'heart') {
+          ctx.font = s + 'px sans-serif'; ctx.fillText('❤️', x, y);
+        }
+        ctx.restore();
+      });
+    }
+
+    if (!CanvasRenderingContext2D.prototype.roundRect) {
+      CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+        r = Math.min(r, w / 2, h / 2);
+        this.moveTo(x + r, y);
+        this.lineTo(x + w - r, y);
+        this.quadraticCurveTo(x + w, y, x + w, y + r);
+        this.lineTo(x + w, y + h - r);
+        this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        this.lineTo(x + r, y + h);
+        this.quadraticCurveTo(x, y + h, x, y + h - r);
+        this.lineTo(x, y + r);
+        this.quadraticCurveTo(x, y, x + r, y);
+        return this;
+      };
+    }
+
+    function drawStar(ctx, cx, cy, spikes, outerR, innerR) {
+      let rot = Math.PI / 2 * 3;
+      let step = Math.PI / spikes;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - outerR);
+      for (let i = 0; i < spikes; i++) {
+        ctx.lineTo(cx + Math.cos(rot) * outerR, cy + Math.sin(rot) * outerR);
+        rot += step;
+        ctx.lineTo(cx + Math.cos(rot) * innerR, cy + Math.sin(rot) * innerR);
+        rot += step;
+      }
+      ctx.lineTo(cx, cy - outerR);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    function addTextToPreview() {
+      const input = document.getElementById('designTextInput');
+      const text = input.value.trim();
+      if (!text) { showToast('الرجاء إدخال النص أولاً', '⚠️'); return; }
+      const font = document.getElementById('textFontSelect').value;
+      const size = parseInt(document.getElementById('textSizeInput').value) || 28;
+      const color = document.getElementById('textColorInput').value;
+      const angle = parseInt(document.getElementById('textAngleSelect').value) || 0;
+      addedTexts.push({ text, font, size, color, angle });
+      input.value = '';
+      renderAddedTexts();
+      drawPreview();
+    }
+
+    function renderAddedTexts() {
+      const container = document.getElementById('addedTextsList');
+      if (!container) return;
+      container.innerHTML = addedTexts.map((t, i) =>
+        '<span style="display:inline-flex;align-items:center;gap:0.3rem;padding:0.2rem 0.5rem;background:rgba(212,168,75,0.1);border:1px solid var(--glass-border);border-radius:6px;font-size:0.75rem;color:var(--text-white);">' +
+        '<span style="max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + t.text + '</span>' +
+        '<button type="button" onclick="removeAddedText(' + i + ')" style="background:none;border:none;color:#e74c3c;cursor:pointer;font-size:0.8rem;">✕</button>' +
+        '</span>'
+      ).join('');
+    }
+
+    function removeAddedText(index) {
+      addedTexts.splice(index, 1);
+      renderAddedTexts();
+      drawPreview();
+    }
+
+    function addDecoration(type) {
+      addedDecorations.push({ type, color: document.getElementById('textColorInput').value || '#d4a84b', size: 24 });
+      drawPreview();
+      showToast('تمت إضافة الزخرفة ✅', '✨');
+    }
+
+    /* ==========================================
+        16. التفاعل والربط مع Firebase والنموذج
+        ========================================== */
+    document.addEventListener('DOMContentLoaded', () => {
+      // إطلاق الجسيمات
+      initParticles();
+
+      // قائمة الهامبرغر للمنتجات
+      const hamburgerBtn = document.getElementById('hamburgerBtn');
+      const menuOverlay = document.getElementById('productMenuOverlay');
+      const menuCloseBtn = document.getElementById('menuCloseBtn');
+
+      function openMenu() {
+        menuOverlay.classList.add('open');
+        hamburgerBtn.classList.add('active');
+      }
+
+      function closeMenu() {
+        menuOverlay.classList.remove('open');
+        hamburgerBtn.classList.remove('active');
+      }
+
+      if (hamburgerBtn && menuOverlay) {
+        hamburgerBtn.addEventListener('click', () => {
+          if (menuOverlay.classList.contains('open')) {
+            closeMenu();
+          } else {
+            openMenu();
+          }
+        });
+
+        if (menuCloseBtn) {
+          menuCloseBtn.addEventListener('click', closeMenu);
+        }
+
+        menuOverlay.addEventListener('click', (e) => {
+          if (e.target === menuOverlay) closeMenu();
+        });
+      }
+
+      // تبديل اللغة
+      const langBtn = document.getElementById('langToggleBtn');
+      if (langBtn) {
+        langBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const html = document.documentElement;
+          const isAr = html.lang === 'ar';
+          html.lang = isAr ? 'en' : 'ar';
+          html.dir = isAr ? 'ltr' : 'rtl';
+          langBtn.querySelector('.menu-item-icon').textContent = isAr ? '🇬🇧' : '🇸🇦';
+          langBtn.querySelector('.menu-item-name').textContent = isAr ? 'اللغة: إنجليزي' : 'اللغة: عربي';
+          langBtn.classList.toggle('active');
+        });
+      }
+
+      // تبديل الوضع (ليلي / نهاري)
+      const themeBtn = document.getElementById('themeToggleBtn');
+      if (themeBtn) {
+        themeBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const isLight = document.body.classList.toggle('light-mode');
+          themeBtn.querySelector('.menu-item-icon').textContent = isLight ? '☀️' : '🌙';
+          themeBtn.querySelector('.menu-item-name').textContent = isLight ? 'الوضع: نهاري' : 'الوضع: ليلي';
+          themeBtn.classList.toggle('active');
+        });
+      }
+
+      // خيارات وتفاعل التبويبات (Product Tabs)
+      const tabs = document.querySelectorAll('.prod-tab');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          tabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          selectedProduct = tab.getAttribute('data-product');
+          updateDynamicOptions(selectedProduct);
+          updatePrice();
+          drawPreview();
+        });
+      });
+
+      // استدعاء أولي لتحديث الخيارات الافتراضية
+      updateDynamicOptions(selectedProduct);
+      updatePrice();
+
+      // أزرار المقاس
+      document.querySelectorAll('.size-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          selectedSize = btn.dataset.size;
+          updatePrice();
+        });
+      });
+
+      // أزرار الكمية
+      document.getElementById('qtyMinus')?.addEventListener('click', () => {
+        if (orderQuantity > 1) { orderQuantity--; document.getElementById('qtyValue').textContent = orderQuantity; updatePrice(); }
+      });
+      document.getElementById('qtyPlus')?.addEventListener('click', () => {
+        if (orderQuantity < 99) { orderQuantity++; document.getElementById('qtyValue').textContent = orderQuantity; updatePrice(); }
+      });
+
+      // أزرار ألوان المنتج
+      document.querySelectorAll('.color-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          selectedColor = btn.dataset.color;
+          drawPreview();
+        });
+      });
+
+      // أزرار نوع الطباعة
+      document.querySelectorAll('.print-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.print-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          selectedPrint = btn.dataset.print;
+        });
+      });
+
+      // أزرار الزخرفة
+      document.querySelectorAll('.deco-btn').forEach(btn => {
+        btn.addEventListener('click', () => addDecoration(btn.dataset.deco));
+      });
+
+      // إضافة نص
+      document.getElementById('addTextBtn')?.addEventListener('click', addTextToPreview);
+      document.getElementById('designTextInput')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); addTextToPreview(); }
+      });
+
+      // إعدادات رفع الملفات والمعاينة
+      const fileUploadBox = document.getElementById('fileUploadBox');
+      const fileInput = document.getElementById('designFileInput');
+      const previewContainer = document.getElementById('imagePreviewContainer');
+      const imagePreview = document.getElementById('imagePreview');
+      const previewFileName = document.getElementById('previewFileName');
+      const previewFileSize = document.getElementById('previewFileSize');
+      const removePreviewBtn = document.getElementById('removePreviewBtn');
+
+      if (fileUploadBox && fileInput) {
+        fileUploadBox.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', handleFileSelect);
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+          fileUploadBox.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            fileUploadBox.style.borderColor = 'var(--gold-primary)';
+            fileUploadBox.style.background = 'rgba(212, 168, 75, 0.04)';
+          }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+          fileUploadBox.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            fileUploadBox.style.borderColor = 'rgba(255, 255, 255, 0.12)';
+            fileUploadBox.style.background = 'rgba(255, 255, 255, 0.005)';
+          }, false);
+        });
+
+        fileUploadBox.addEventListener('drop', (e) => {
+          const dt = e.dataTransfer;
+          const files = dt.files;
+          if (files.length > 0) {
+            fileInput.files = files;
+            handleFileSelect();
+          }
+        });
+      }
+
+      function handleFileSelect() {
+        const file = fileInput.files[0];
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+          showToast('عذراً، يرجى رفع ملف صورة فقط (PNG, JPG, SVG)...', '❌');
+          fileInput.value = '';
+          return;
+        }
+        const sizeInKB = (file.size / 1024).toFixed(1);
+        previewFileName.textContent = file.name;
+        previewFileSize.textContent = sizeInKB + ' KB';
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          imagePreview.src = e.target.result;
+          const img = new Image();
+          img.onload = () => {
+            uploadedImage = img;
+            previewContainer.style.display = 'flex';
+            fileUploadBox.style.display = 'none';
+            drawPreview();
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+
+      if (removePreviewBtn) {
+        removePreviewBtn.addEventListener('click', () => {
+          fileInput.value = '';
+          imagePreview.src = '';
+          uploadedImage = null;
+          previewContainer.style.display = 'none';
+          fileUploadBox.style.display = 'flex';
+          drawPreview();
+        });
+      }
+
+      // معاينة Canvas عند تغيير الحجم
+      const resizeObserver = new ResizeObserver(() => drawPreview());
+      const previewCanvas = document.getElementById('livePreviewCanvas');
+      if (previewCanvas) resizeObserver.observe(previewCanvas.parentElement);
+
+      // حفظ الإعدادات الافتراضية في localStorage و Firestore
+      document.getElementById('saveProductDefaultsBtn')?.addEventListener('click', async () => {
+        const settings = {
+          material: document.getElementById('materialSelect')?.value || 'cotton',
+          printType: selectedPrint,
+          color: selectedColor,
+          size: selectedSize
+        };
+        try {
+          localStorage.setItem('azma_product_defaults_' + selectedProduct, JSON.stringify(settings));
+          if (typeof db !== 'undefined') {
+            await db.collection('product_defaults').doc(selectedProduct).set(settings);
+          }
+          showToast('تم حفظ الإعدادات الافتراضية للمنتج ✅', '💾');
+        } catch (e) {
+          showToast('فشل الحفظ: ' + e.message, '❌');
+        }
+      });
+
+      // تحميل الإعدادات الافتراضية إن وجدت
+      function loadProductDefaults(productType) {
+        const saved = localStorage.getItem('azma_product_defaults_' + productType);
+        if (saved) {
+          try {
+            const s = JSON.parse(saved);
+            if (s.material) { const el = document.getElementById('materialSelect'); if (el) el.value = s.material; }
+            if (s.printType) {
+              selectedPrint = s.printType;
+              document.querySelectorAll('.print-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.print === s.printType);
+              });
+            }
+            if (s.color) {
+              selectedColor = s.color;
+              document.querySelectorAll('.color-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.color === s.color);
+              });
+            }
+            if (s.size) {
+              selectedSize = s.size;
+              document.querySelectorAll('.size-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.size === s.size);
+              });
+            }
+            drawPreview();
+            updatePrice();
+          } catch (e) { }
+        }
+      }
+
+      // تحميل الإعدادات عند تغيير المنتج وتحميل الصفحة
+      const origUpdate = updateDynamicOptions;
+      updateDynamicOptions = function (pt) {
+        origUpdate(pt);
+        setTimeout(() => loadProductDefaults(pt), 100);
+      };
+
+      // رسم Canvas عند ظهور الواجهة
+      setTimeout(drawPreview, 500);
+
+      // ==========================================
+      // مراقبة حالة مستخدم Firebase (Auth Listener)
+      // ==========================================
+      if (typeof auth !== 'undefined') {
+        auth.onAuthStateChanged(user => {
+          const loginView = document.getElementById('auth-login-view');
+          const designerView = document.getElementById('auth-designer-view');
+          const navLogoutBtn = document.getElementById('navLogoutBtn');
+
+          if (user) {
+            // العميل مسجل الدخول
+            loginView.style.display = 'none';
+            designerView.style.display = 'block';
+            if (navLogoutBtn) navLogoutBtn.style.display = 'block';
+
+            // تخصيص الترحيب بالاسم الأول
+            const firstName = user.displayName ? user.displayName.split(' ')[0] : 'أهلاً بك';
+            document.getElementById('welcomeUserText').innerHTML = 'مرحباً ' + firstName + '، صمم منتجك ✨';
+
+            // رسم المعاينة بعد ظهور الواجهة
+            setTimeout(drawPreview, 300);
+          } else {
+            // العميل غير مسجل الدخول
+            loginView.style.display = 'block';
+            designerView.style.display = 'none';
+            if (navLogoutBtn) navLogoutBtn.style.display = 'none';
+          }
+        });
+      }
+
+      // الربط مع حالة تفعيل المنتجات من لوحة الإدارة
+      if (typeof db !== 'undefined') {
+        db.collection('admin_settings').doc('products').onSnapshot(doc => {
+          if (doc.exists) {
+            const enabled = doc.data();
+            document.querySelectorAll('.product-card').forEach(card => {
+              const link = card.getAttribute('onclick') || '';
+              const origLink = card.getAttribute('data-orig-onclick') || '';
+              const useLink = origLink || link;
+              const match = useLink.match(/product=(\w+)/);
+              if (match) {
+                const key = match[1];
+                if (enabled[key] === false) {
+                  card.classList.add('disabled');
+                  card.removeAttribute('onclick');
+                  card.style.cursor = 'default';
+                } else {
+                  card.classList.remove('disabled');
+                  card.style.cursor = 'pointer';
+                  if (useLink && !card.getAttribute('onclick')) {
+                    card.setAttribute('onclick', useLink);
+                  }
+                  if (!origLink && link) {
+                    card.setAttribute('data-orig-onclick', link);
+                  }
+                }
+              }
+            });
+          }
+        });
+      }
+
+      // حدث النقر لتسجيل الدخول بجوجل
+      const googleLoginBtn = document.getElementById('googleLoginBtn');
+      if (googleLoginBtn && typeof auth !== 'undefined') {
+        googleLoginBtn.addEventListener('click', () => {
+          const provider = new firebase.auth.GoogleAuthProvider();
+          auth.signInWithPopup(provider)
+            .then(result => {
+              showToast('مرحباً بك في أزما! 👋', '✨');
+            })
+            .catch(error => {
+              console.error("Sign-in error: ", error);
+              showToast('فشل الدخول. تأكد من إعدادات Firebase وحاول مجدداً.', '❌');
+            });
+        });
+      }
+
+      // حدث تسجيل الخروج من الشريط العلوي
+      const navLogoutBtn = document.getElementById('navLogoutBtn');
+      if (navLogoutBtn && typeof auth !== 'undefined') {
+        navLogoutBtn.addEventListener('click', () => {
+          auth.signOut().then(() => {
+            showToast('تم تسجيل الخروج بنجاح من حسابك.', '🚪');
+          });
+        });
+      }
+
+      // ==========================================
+      // منطق معالجة وإرسال الطلبات لحساب Firestore
+      // ==========================================
+      const designerForm = document.getElementById('designerForm');
+      const cardLoader = document.getElementById('cardLoader');
+
+      if (designerForm) {
+        designerForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+
+          if (typeof auth === 'undefined' || typeof db === 'undefined' || typeof storage === 'undefined') {
+            showToast('خطأ: لم يتم تهيئة Firebase بالشكل الصحيح بعد.', '❌');
+            return;
+          }
+
+          const user = auth.currentUser;
+          if (!user) {
+            showToast('يرجى تسجيل الدخول أولاً لإرسال الطلب!', '❌');
+            return;
+          }
+
+          const phone = document.getElementById('userPhoneInput').value;
+          const designText = addedTexts.map(t => t.text).join(' | ');
+
+          // تجميع الخيارات الديناميكية المحددة
+          const dynamicSelects = document.querySelectorAll('#dynamicOptionsGroup .setting-select');
+          const selectedOptionsObj = {
+            product: selectedProduct,
+            size: selectedSize,
+            color: selectedColor,
+            material: document.getElementById('materialSelect')?.value || '',
+            printType: selectedPrint,
+            quantity: orderQuantity
+          };
+          dynamicSelects.forEach(sel => {
+            const cleanLabel = sel.dataset.label.replace(':', '');
+            selectedOptionsObj[cleanLabel] = sel.options[sel.selectedIndex].text;
+          });
+
+          const file = fileInput.files[0];
+
+          if (!phone) {
+            showToast('رقم الجوال مطلوب لتأكيد تواصلنا معك!', '⚠️');
+            return;
+          }
+
+          if (!file) {
+            showToast('يرجى اختيار تصميمك المخصص أولاً!', '⚠️');
+            return;
+          }
+
+          // تفعيل حالة التحميل البصرية (Loader)
+          if (cardLoader) cardLoader.style.display = 'flex';
+
+          try {
+            // 1. رفع الصورة إلى Firebase Storage
+            const timestamp = Date.now();
+            const storageRef = storage.ref('designs/' + user.uid + '_' + timestamp + '_' + file.name);
+
+            const uploadTask = await storageRef.put(file);
+            const downloadURL = await uploadTask.ref.getDownloadURL();
+
+            // 2. تجميع البيانات ورفعها لقاعدة البيانات Firestore
+            const orderData = {
+              userId: user.uid,
+              userName: user.displayName || 'عميل أزما',
+              userPhone: phone,
+              productType: selectedProduct,
+              designImage: downloadURL,
+              designText: designText || '',
+              options: selectedOptionsObj,
+              addedTexts: addedTexts,
+              addedDecorations: addedDecorations,
+              totalPrice: calculateTotalPrice(),
+              status: "جديد",
+              createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            await db.collection('orders').add(orderData);
+
+            // إشعار النجاح
+            showToast('تم إرسال طلبك بنجاح! 📦', '💎');
+
+            // تفريغ النموذج والعودة للحالة الافتراضية
+            designerForm.reset();
+            fileInput.value = '';
+            imagePreview.src = '';
+            uploadedImage = null;
+            previewContainer.style.display = 'none';
+            fileUploadBox.style.display = 'flex';
+            addedTexts = [];
+            addedDecorations = [];
+            orderQuantity = 1;
+            selectedSize = 'L';
+            selectedColor = 'black';
+            selectedPrint = 'heat';
+            document.getElementById('qtyValue').textContent = '1';
+            renderAddedTexts();
+            // إعادة تعيين الخيارات المرئية
+            document.querySelectorAll('.size-btn').forEach(b => b.classList.toggle('active', b.dataset.size === 'L'));
+            document.querySelectorAll('.color-btn').forEach(b => b.classList.toggle('active', b.dataset.color === 'black'));
+            document.querySelectorAll('.print-btn').forEach(b => b.classList.toggle('active', b.dataset.print === 'heat'));
+
+            selectedProduct = 'tshirt';
+            tabs.forEach(t => t.classList.remove('active'));
+            const defaultTab = document.querySelector('[data-product="tshirt"]');
+            if (defaultTab) defaultTab.classList.add('active');
+            updateDynamicOptions('tshirt');
+            updatePrice();
+            drawPreview();
+
+          } catch (error) {
+            console.error("Submission error: ", error);
+            showToast('حدث خطأ أثناء رفع الطلب: ' + error.message, '❌');
+          } finally {
+            if (cardLoader) cardLoader.style.display = 'none';
+          }
+        });
+      }
+
+      // أيقونات التواصل العائمة - تفتح عند الوصول لآخر الموقع
+      const socialFloat = document.getElementById('socialFloat');
+      if (socialFloat) {
+        function checkSocialScroll() {
+          const scrollBottom = window.innerHeight + window.scrollY;
+          const docHeight = document.documentElement.scrollHeight;
+          if (docHeight - scrollBottom < 150) {
+            socialFloat.classList.remove('collapsed');
+            socialFloat.classList.add('expanded');
+          } else {
+            socialFloat.classList.remove('expanded');
+            socialFloat.classList.add('collapsed');
+          }
+        }
+        window.addEventListener('scroll', checkSocialScroll);
+        checkSocialScroll();
+
+        // ===== تواصل مع عميل — يفتح بوت التلقارام =====
+        // الرابط الآن يفتح مباشرة https://t.me/n8nhassenbot
+
+        // إرسال رسالة العميل للسيرفر
+        document.getElementById('contactForm').addEventListener('submit', function (e) {
+          e.preventDefault();
+          const btn = this.querySelector('button[type="submit"]');
+          btn.disabled = true; btn.textContent = 'جاري الإرسال...';
+
+          const data = {
+            name: document.getElementById('contactName').value,
+            phone: document.getElementById('contactPhone').value,
+            message: document.getElementById('contactMsg').value,
+            page: window.location.pathname
+          };
+
+          fetch('https://azma-bot.onrender.com/api/contact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+          })
+            .then(r => r.json())
+            .then(res => {
+              if (res.ok) {
+                document.getElementById('contactModal').classList.remove('open');
+                showToast('تم إرسال رسالتك! سنتواصل معك قريباً', '✅');
+                this.reset();
+              } else {
+                showToast('عذراً، حدث خطأ. حاول مرة أخرى', '❌');
+              }
+            })
+            .catch(() => showToast('تعذر الاتصال بالخادم', '❌'))
+            .finally(() => { btn.disabled = false; btn.textContent = 'إرسال'; });
+        });
+
+        // إغلاق المودال
+        document.querySelectorAll('#contactModal .close, #contactModal .overlay').forEach(el => {
+          el.addEventListener('click', () => document.getElementById('contactModal').classList.remove('open'));
+        });
+      }
+    });
+  </script>
+
+  <!-- ===== مساعد أزما - JavaScript ===== -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const btn = document.getElementById('azma-chat-btn');
+      const win = document.getElementById('azma-chat-window');
+      const closeBtn = document.getElementById('azma-chat-close');
+      const msgArea = document.getElementById('azma-chat-messages');
+      const input = document.getElementById('azma-chat-input');
+      const sendBtn = document.getElementById('azma-chat-send');
+      let chatHistory = [];
+
+      // تحميل رسالة الترحيب من السيرفر
+      fetch('https://azma-bot.onrender.com/api/get-bot-settings')
+        .then(function (r) { return r.json(); })
+        .then(function (res) {
+          if (res.ok && res.settings && res.settings.welcomeMessage) {
+            document.querySelector('#azma-chat-messages .azma-msg.bot');
+            addMessage(res.settings.welcomeMessage, 'bot');
+          } else {
+            addMessage('مرحباً بك في أزما! كيف أقدر أساعدك اليوم؟', 'bot');
+          }
+        })
+        .catch(function () {
+          addMessage('مرحباً بك في أزما! كيف أقدر أساعدك اليوم؟', 'bot');
+        });
+
+      btn.addEventListener('click', function () {
+        if (msgArea.children.length === 0) {
+          addMessage('مرحباً بك في أزما! كيف أقدر أساعدك اليوم؟', 'bot');
+        }
+        win.classList.add('open');
+        btn.classList.add('hidden');
+        input.focus();
+      });
+
+      closeBtn.addEventListener('click', function () {
+        win.classList.remove('open');
+        btn.classList.remove('hidden');
+      });
+
+      function addMessage(text, role) {
+        const div = document.createElement('div');
+        div.className = 'azma-msg ' + (role === 'user' ? 'user' : 'bot');
+        div.textContent = text;
+        msgArea.appendChild(div);
+        msgArea.scrollTop = msgArea.scrollHeight;
+      }
+
+      function showTyping() {
+        const div = document.createElement('div');
+        div.className = 'azma-msg typing';
+        div.id = 'typing-indicator';
+        div.textContent = 'يكتب...';
+        msgArea.appendChild(div);
+        msgArea.scrollTop = msgArea.scrollHeight;
+      }
+
+      function hideTyping() {
+        const el = document.getElementById('typing-indicator');
+        if (el) el.remove();
+      }
+
+      function sendMessage() {
+        const text = input.value.trim();
+        if (!text) return;
+        input.value = '';
+        addMessage(text, 'user');
+        chatHistory.push({ role: 'user', content: text });
+        sendBtn.disabled = true;
+        showTyping();
+
+        fetch('https://azma-bot.onrender.com/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text, history: chatHistory.slice(-10) })
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (res) {
+            hideTyping();
+            if (res.ok && res.reply) {
+              addMessage(res.reply, 'bot');
+              chatHistory.push({ role: 'assistant', content: res.reply });
+            } else {
+              addMessage('عذراً، حدث خطأ. حاول مرة أخرى', 'bot');
+            }
+          })
+          .catch(function () {
+            hideTyping();
+            addMessage('عذراً، تعذر الاتصال بالخادم', 'bot');
+          })
+          .finally(function () { sendBtn.disabled = false; });
+      }
+
+      sendBtn.addEventListener('click', sendMessage);
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') sendMessage();
+      });
+    });
+  </script>
+
+  <!-- مودال التواصل مع العميل -->
+  <div id="contactModal">
+    <div class="overlay"></div>
+    <div class="modal">
+      <button class="close">✕</button>
+      <h3>📞 تواصل مع عميل</h3>
+      <p style="color:rgba(255,255,255,0.5);font-size:0.8rem;margin:-0.5rem 0 1rem 0;">رسالتك توصل للمالك مباشرة</p>
+      <form id="contactForm">
+        <input type="text" id="contactName" placeholder="اسمك (اختياري)" />
+        <input type="tel" id="contactPhone" placeholder="رقم جوالك (اختياري)" />
+        <textarea id="contactMsg" placeholder="اكتب رسالتك أو شكوتك هنا..." required></textarea>
+        <button type="submit">إرسال</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== مساعد أزما - شات بوت ===== -->
+  <div id="azma-chat-btn">💬</div>
+  <div id="azma-chat-window">
+    <div id="azma-chat-header">
+      <span>🤖 مساعد أزما</span>
+      <button id="azma-chat-close">✕</button>
+    </div>
+    <div id="azma-chat-messages"></div>
+    <div id="azma-chat-input-area">
+      <input type="text" id="azma-chat-input" placeholder="اكتب رسالتك..." />
+      <button id="azma-chat-send">➤</button>
+    </div>
+  </div>
+
+  <style>
+    #contactModal {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #contactModal.open {
+      display: flex;
+    }
+
+    #contactModal .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    #contactModal .modal {
+      position: relative;
+      background: #131216;
+      border: 1px solid rgba(212, 168, 75, 0.15);
+      border-radius: 20px;
+      padding: 2rem;
+      width: 90%;
+      max-width: 400px;
+      font-family: 'Tajawal', sans-serif;
+    }
+
+    #contactModal .close {
+      position: absolute;
+      top: 0.8rem;
+      left: 1rem;
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+
+    #contactModal h3 {
+      color: #d4a84b;
+      margin: 0 0 0.5rem 0;
+      text-align: center;
+    }
+
+    #contactForm {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+    }
+
+    #contactForm input,
+    #contactForm textarea {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 0.7rem 1rem;
+      color: #fff;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border 0.3s;
+    }
+
+    #contactForm input:focus,
+    #contactForm textarea:focus {
+      border-color: rgba(212, 168, 75, 0.4);
+    }
+
+    #contactForm textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    #contactForm button {
+      background: rgba(212, 168, 75, 0.15);
+      border: 1px solid rgba(212, 168, 75, 0.3);
+      border-radius: 10px;
+      padding: 0.7rem;
+      color: #d4a84b;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    #contactForm button:hover {
+      background: rgba(212, 168, 75, 0.25);
+    }
+
+    #contactForm button:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    /* ===== مساعد أزما - شات بوت ===== */
+    #azma-chat-btn {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      width: 55px;
+      height: 55px;
+      background: linear-gradient(135deg, #d4a84b, #a37c22);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #000;
+      font-size: 1.5rem;
+      cursor: pointer;
+      z-index: 9999;
+      box-shadow: 0 4px 20px rgba(212, 168, 75, 0.4);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    #azma-chat-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 25px rgba(212, 168, 75, 0.6);
+    }
+
+    #azma-chat-btn.hidden {
+      display: none;
+    }
+
+    #azma-chat-window {
+      position: fixed;
+      bottom: 145px;
+      right: 20px;
+      width: 350px;
+      height: 480px;
+      background: #131216;
+      border: 1px solid rgba(212, 168, 75, 0.2);
+      border-radius: 16px;
+      display: none;
+      flex-direction: column;
+      z-index: 9999;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      font-family: 'Tajawal', sans-serif;
+    }
+
+    #azma-chat-window.open {
+      display: flex;
+    }
+
+    #azma-chat-header {
+      background: linear-gradient(135deg, #1a181c, #131216);
+      border-bottom: 1px solid rgba(212, 168, 75, 0.15);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #d4a84b;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    #azma-chat-header button {
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    #azma-chat-header button:hover {
+      color: #fff;
+    }
+
+    #azma-chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    #azma-chat-messages::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    #azma-chat-messages::-webkit-scrollbar-thumb {
+      background: rgba(212, 168, 75, 0.3);
+      border-radius: 99px;
+    }
+
+    .azma-msg {
+      max-width: 85%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      word-wrap: break-word;
+      animation: msgSlide 0.3s ease;
+    }
+
+    .azma-msg.bot {
+      background: rgba(212, 168, 75, 0.08);
+      border: 1px solid rgba(212, 168, 75, 0.1);
+      color: rgba(255, 255, 255, 0.9);
+      align-self: flex-start;
+      border-bottom-right-radius: 4px;
+    }
+
+    .azma-msg.user {
+      background: rgba(212, 168, 75, 0.2);
+      border: 1px solid rgba(212, 168, 75, 0.2);
+      color: #d4a84b;
+      align-self: flex-end;
+      border-bottom-left-radius: 4px;
+    }
+
+    .azma-msg.typing {
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 0.8rem;
+      align-self: flex-start;
+    }
+
+    @keyframes msgSlide {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    #azma-chat-input-area {
+      display: flex;
+      padding: 10px 12px;
+      gap: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      background: #0f0e11;
+    }
+
+    #azma-chat-input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: #fff;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 0.85rem;
+      outline: none;
+      transition: border 0.3s;
+    }
+
+    #azma-chat-input:focus {
+      border-color: rgba(212, 168, 75, 0.4);
+    }
+
+    #azma-chat-input::placeholder {
+      color: rgba(255, 255, 255, 0.3);
+    }
+
+    #azma-chat-send {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, #d4a84b, #a37c22);
+      border: none;
+      border-radius: 10px;
+      color: #000;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: opacity 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #azma-chat-send:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    #azma-chat-send:hover:not(:disabled) {
+      opacity: 0.85;
+    }
+
+    @media (max-width:480px) {
+      #azma-chat-window {
+        width: calc(100vw - 20px);
+        height: 55vh;
+        bottom: 140px;
+        right: 10px;
+      }
+
+      #azma-chat-btn {
+        bottom: 75px;
+        right: 12px;
+        width: 50px;
+        height: 50px;
+        font-size: 1.3rem;
+      }
+    }
+  </style>
+</body>
+
+</html>
