@@ -1,0 +1,2556 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>أزمـا | لوحة الإدارة</title>
+  <meta name="description" content="لوحة تحكم وإدارة متكاملة لمنصة أزما للتصميم والطباعة الفاخرة" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Outfit:wght@300;400;500;700;900&display=swap" rel="stylesheet" />
+
+  <!-- Firebase v8 SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+  <style>
+    /* ============================================================
+       متغيرات التصميم الأساسية
+       ============================================================ */
+    :root {
+      --bg:            #080709;
+      --bg-2:          #0f0e11;
+      --sidebar-bg:    #0a090d;
+      --gold:          #d4a84b;
+      --gold-light:    #f0c96a;
+      --gold-dark:     #a37c22;
+      --gold-glow:     rgba(212, 168, 75, 0.18);
+      --gold-border:   rgba(212, 168, 75, 0.28);
+      --glass:         rgba(255,255,255,0.035);
+      --glass-hover:   rgba(255,255,255,0.065);
+      --glass-border:  rgba(255,255,255,0.07);
+      --text:          #f0ece4;
+      --text-muted:    rgba(240,236,228,0.55);
+      --text-dim:      rgba(240,236,228,0.35);
+      --radius:        14px;
+      --radius-sm:     8px;
+      --transition:    0.3s cubic-bezier(0.25,1,0.5,1);
+
+      /* ألوان المنتجات */
+      --c-tshirt:   #3b82f6;
+      --c-mug:      #ef4444;
+      --c-cap:      #8b5cf6;
+      --c-pillow:   #22c55e;
+      --c-stickers: #f59e0b;
+      --c-frame:    #ec4899;
+
+      /* حالات الطلبات */
+      --s-new:       #3b82f6;
+      --s-process:   #f59e0b;
+      --s-ready:     #8b5cf6;
+      --s-delivered: #22c55e;
+      --s-cancelled: #ef4444;
+    }
+
+    /* ============================================================
+       إعادة الضبط والقاعدة
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+      position: relative;
+    }
+
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--gold-border); border-radius: 99px; }
+
+    /* ============================================================
+       خلفية الكرات
+       ============================================================ */
+    .orbs-bg {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+    }
+    .orb {
+      position: absolute; border-radius: 50%;
+      filter: blur(80px); mix-blend-mode: screen; opacity: 0.35;
+    }
+    .orb-1 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(212,168,75,0.22) 0%, transparent 70%);
+      top: -120px; right: -80px;
+      animation: floatOrb 20s ease-in-out infinite alternate;
+    }
+    .orb-2 {
+      width: 350px; height: 350px;
+      background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%);
+      bottom: -80px; left: 200px;
+      animation: floatOrb 16s ease-in-out infinite alternate-reverse;
+    }
+    .orb-3 {
+      width: 250px; height: 250px;
+      background: radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%);
+      top: 40%; left: 30%;
+      animation: floatOrb 13s ease-in-out infinite alternate;
+    }
+    @keyframes floatOrb {
+      0%   { transform: translate(0,0) scale(1); }
+      50%  { transform: translate(-30px, 40px) scale(1.08); }
+      100% { transform: translate(20px,-20px) scale(0.95); }
+    }
+
+    /* ============================================================
+       الشريط الجانبي
+       ============================================================ */
+    #sidebar {
+      width: 270px; min-width: 270px;
+      background: var(--sidebar-bg);
+      border-left: 1px solid var(--gold-border);
+      display: flex; flex-direction: column;
+      height: 100vh; overflow-y: auto;
+      position: relative; z-index: 50;
+      transition: width var(--transition), min-width var(--transition);
+      flex-shrink: 0;
+    }
+    #sidebar.collapsed {
+      width: 70px; min-width: 70px;
+    }
+
+    .sidebar-header {
+      padding: 1.6rem 1.4rem 1.2rem;
+      border-bottom: 1px solid var(--gold-border);
+      display: flex; align-items: center; gap: 0.8rem;
+      position: relative;
+    }
+    .sidebar-logo {
+      font-size: 1.55rem; font-weight: 900; letter-spacing: 1px;
+      background: linear-gradient(135deg, #fff 0%, var(--gold) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; white-space: nowrap;
+      transition: opacity var(--transition);
+    }
+    #sidebar.collapsed .sidebar-logo { opacity: 0; pointer-events: none; }
+    #sidebar.collapsed .sidebar-header { justify-content: center; }
+
+    .sidebar-icon-mark {
+      width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--gold-dark), var(--gold-light));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; box-shadow: 0 0 16px var(--gold-glow);
+    }
+
+    .toggle-sidebar-btn {
+      position: absolute; left: -13px; top: 50%; transform: translateY(-50%);
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--gold); border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; color: #000; z-index: 10;
+      box-shadow: 0 0 12px var(--gold-glow);
+      transition: background var(--transition), transform var(--transition);
+    }
+    .toggle-sidebar-btn:hover { background: var(--gold-light); }
+    #sidebar.collapsed .toggle-sidebar-btn { transform: translateY(-50%) rotate(180deg); }
+
+    /* القائمة الجانبية */
+    .sidebar-nav { padding: 1rem 0; flex: 1; }
+    .nav-section-title {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 2px;
+      color: var(--text-dim); padding: 0.6rem 1.4rem 0.3rem;
+      text-transform: uppercase; transition: opacity var(--transition);
+    }
+    #sidebar.collapsed .nav-section-title { opacity: 0; }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 0.85rem;
+      padding: 0.75rem 1.4rem; cursor: pointer;
+      border-radius: 0; transition: all var(--transition);
+      position: relative; color: var(--text-muted);
+      font-size: 0.95rem; font-weight: 500;
+      border-right: 3px solid transparent;
+      overflow: hidden;
+    }
+    .nav-item:hover {
+      background: var(--glass-hover); color: var(--text);
+    }
+    .nav-item.active {
+      background: var(--gold-glow);
+      color: var(--gold);
+      border-right-color: var(--gold);
+    }
+    .nav-item .nav-icon {
+      font-size: 1.15rem; flex-shrink: 0; width: 22px; text-align: center;
+    }
+    .nav-item .nav-label {
+      white-space: nowrap; transition: opacity var(--transition), width var(--transition);
+    }
+    #sidebar.collapsed .nav-item .nav-label {
+      opacity: 0; width: 0; overflow: hidden;
+    }
+    #sidebar.collapsed .nav-item { padding: 0.75rem; justify-content: center; }
+    #sidebar.collapsed .nav-item .nav-icon { width: auto; }
+
+    /* شارة العدد */
+    .nav-badge {
+      margin-right: auto; /* RTL: push to left */
+      background: var(--gold); color: #000;
+      font-size: 0.7rem; font-weight: 800;
+      padding: 0.1rem 0.5rem; border-radius: 99px; min-width: 22px; text-align: center;
+      animation: pulse-badge 2s ease-in-out infinite;
+    }
+    @keyframes pulse-badge {
+      0%,100% { box-shadow: 0 0 0 0 rgba(212,168,75,0.4); }
+      50%      { box-shadow: 0 0 0 5px rgba(212,168,75,0); }
+    }
+    #sidebar.collapsed .nav-badge { display: none; }
+
+    /* قسم المستخدم */
+    .sidebar-user {
+      padding: 1rem 1.4rem;
+      border-top: 1px solid var(--gold-border);
+      display: flex; align-items: center; gap: 0.8rem;
+    }
+    .user-avatar {
+      width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; font-weight: 900; color: #000;
+      box-shadow: 0 0 10px var(--gold-glow);
+    }
+    .user-info { flex: 1; overflow: hidden; transition: opacity var(--transition); }
+    .user-info .user-name { font-size: 0.88rem; font-weight: 700; white-space: nowrap; }
+    .user-info .user-role { font-size: 0.72rem; color: var(--gold); }
+    #sidebar.collapsed .user-info { opacity: 0; width: 0; }
+
+    .logout-btn {
+      background: transparent; border: 1px solid rgba(239,68,68,0.3);
+      color: rgba(239,68,68,0.7); padding: 0.4rem 0.9rem;
+      border-radius: 8px; cursor: pointer; font-size: 0.8rem;
+      font-family: 'Tajawal', sans-serif; font-weight: 700;
+      transition: all var(--transition); white-space: nowrap;
+    }
+    .logout-btn:hover { border-color: #ef4444; color: #ef4444; background: rgba(239,68,68,0.08); }
+    #sidebar.collapsed .logout-btn { display: none; }
+
+    /* ============================================================
+       المنطقة الرئيسية
+       ============================================================ */
+    #main-area {
+      flex: 1; display: flex; flex-direction: column;
+      overflow: hidden; position: relative; z-index: 10;
+    }
+
+    /* شريط الرأس */
+    #topbar {
+      background: rgba(8,7,9,0.85); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 0.9rem 2rem;
+      display: flex; align-items: center; gap: 1rem;
+      flex-shrink: 0;
+    }
+    .topbar-title {
+      font-size: 1.25rem; font-weight: 800;
+      background: linear-gradient(90deg, #fff 0%, var(--gold) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .topbar-subtitle { font-size: 0.78rem; color: var(--text-muted); margin-top: 1px; }
+    .topbar-right { margin-right: auto; display: flex; align-items: center; gap: 1rem; }
+
+    .topbar-time {
+      font-size: 0.82rem; color: var(--text-muted);
+      background: var(--glass); border: 1px solid var(--glass-border);
+      padding: 0.4rem 0.9rem; border-radius: 8px;
+    }
+    .notification-bell {
+      position: relative; width: 38px; height: 38px;
+      background: var(--glass); border: 1px solid var(--glass-border);
+      border-radius: 10px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 1.1rem; transition: all var(--transition);
+    }
+    .notification-bell:hover { border-color: var(--gold-border); background: var(--gold-glow); }
+    .notif-dot {
+      position: absolute; top: 5px; right: 5px;
+      width: 9px; height: 9px; border-radius: 50%;
+      background: var(--gold); border: 2px solid var(--bg);
+    }
+
+    /* ============================================================
+       محتوى الصفحات
+       ============================================================ */
+    #page-content {
+      flex: 1; overflow-y: auto; padding: 2rem;
+      scroll-behavior: smooth;
+    }
+
+    /* صفحة */
+    .page { display: none; animation: fadeIn 0.35s ease forwards; }
+    .page.active { display: block; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ============================================================
+       بطاقات الإحصائيات
+       ============================================================ */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.2rem; margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: var(--glass); border: 1px solid var(--glass-border);
+      border-radius: var(--radius); padding: 1.4rem 1.6rem;
+      position: relative; overflow: hidden;
+      transition: all var(--transition); cursor: default;
+    }
+    .stat-card::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, var(--card-color, var(--gold)) 0%, transparent 60%);
+      opacity: 0.06; transition: opacity var(--transition);
+    }
+    .stat-card:hover::before { opacity: 0.1; }
+    .stat-card:hover { border-color: var(--card-color, var(--gold-border)); transform: translateY(-2px); }
+
+    .stat-top { display: flex; justify-content: space-between; align-items: flex-start; }
+    .stat-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: rgba(var(--card-rgb, 212,168,75), 0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem;
+    }
+    .stat-change {
+      font-size: 0.72rem; font-weight: 700;
+      padding: 0.2rem 0.55rem; border-radius: 6px;
+    }
+    .stat-change.up { background: rgba(34,197,94,0.15); color: #22c55e; }
+    .stat-change.neutral { background: rgba(212,168,75,0.15); color: var(--gold); }
+
+    .stat-value {
+      font-size: 2.1rem; font-weight: 900; margin-top: 0.8rem;
+      color: var(--card-color, var(--text));
+    }
+    .stat-label { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.2rem; }
+    .stat-sub { font-size: 0.72rem; color: var(--text-dim); margin-top: 0.35rem; }
+
+    /* ============================================================
+       بطاقات المحتوى العامة
+       ============================================================ */
+    .card {
+      background: var(--glass); border: 1px solid var(--glass-border);
+      border-radius: var(--radius); overflow: hidden;
+    }
+    .card-header {
+      padding: 1.2rem 1.6rem; border-bottom: 1px solid var(--glass-border);
+      display: flex; align-items: center; gap: 0.8rem;
+    }
+    .card-title { font-size: 1rem; font-weight: 800; }
+    .card-subtitle { font-size: 0.78rem; color: var(--text-muted); }
+    .card-actions { margin-right: auto; display: flex; gap: 0.6rem; }
+    .card-body { padding: 1.4rem 1.6rem; }
+
+    /* ============================================================
+       شبكة الرسوم البيانية
+       ============================================================ */
+    .charts-grid {
+      display: grid; grid-template-columns: 2fr 1fr;
+      gap: 1.2rem; margin-bottom: 2rem;
+    }
+    @media (max-width: 1000px) {
+      .charts-grid { grid-template-columns: 1fr; }
+    }
+    .chart-wrapper {
+      position: relative; height: 260px;
+    }
+
+    /* ============================================================
+       جداول البيانات
+       ============================================================ */
+    .data-table {
+      width: 100%; border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    .data-table thead th {
+      padding: 0.8rem 1rem; text-align: right;
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px;
+      color: var(--text-dim); text-transform: uppercase;
+      border-bottom: 1px solid var(--glass-border);
+      white-space: nowrap;
+    }
+    .data-table tbody tr {
+      transition: background var(--transition); border-radius: 8px;
+    }
+    .data-table tbody tr:hover { background: var(--glass-hover); }
+    .data-table tbody td {
+      padding: 0.9rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.03);
+      vertical-align: middle;
+    }
+    .data-table tbody tr:last-child td { border-bottom: none; }
+
+    /* ============================================================
+       شارات الحالة والمنتج
+       ============================================================ */
+    .badge {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.72rem; font-weight: 700; padding: 0.25rem 0.65rem;
+      border-radius: 99px; white-space: nowrap;
+    }
+    .badge-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+    .badge-new      { background: rgba(59,130,246,0.18); color: #3b82f6; }
+    .badge-process  { background: rgba(245,158,11,0.18); color: #f59e0b; }
+    .badge-ready    { background: rgba(139,92,246,0.18); color: #8b5cf6; }
+    .badge-delivered{ background: rgba(34,197,94,0.18);  color: #22c55e; }
+    .badge-cancelled{ background: rgba(239,68,68,0.18);  color: #ef4444; }
+
+    .badge-tshirt   { background: rgba(59,130,246,0.15); color: #3b82f6; }
+    .badge-mug      { background: rgba(239,68,68,0.15);  color: #ef4444; }
+    .badge-cap      { background: rgba(139,92,246,0.15); color: #8b5cf6; }
+    .badge-pillow   { background: rgba(34,197,94,0.15);  color: #22c55e; }
+    .badge-stickers { background: rgba(245,158,11,0.15); color: #f59e0b; }
+    .badge-frame    { background: rgba(236,72,153,0.15); color: #ec4899; }
+
+    /* ============================================================
+       أزرار
+       ============================================================ */
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.45rem;
+      padding: 0.55rem 1.2rem; border-radius: var(--radius-sm);
+      font-family: 'Tajawal', sans-serif; font-size: 0.85rem; font-weight: 700;
+      cursor: pointer; border: none; transition: all var(--transition);
+      white-space: nowrap;
+    }
+    .btn-gold {
+      background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+      color: #000; box-shadow: 0 4px 16px var(--gold-glow);
+    }
+    .btn-gold:hover {
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      box-shadow: 0 6px 24px rgba(212,168,75,0.35);
+      transform: translateY(-1px);
+    }
+    .btn-glass {
+      background: var(--glass); border: 1px solid var(--glass-border);
+      color: var(--text-muted);
+    }
+    .btn-glass:hover { border-color: var(--gold-border); color: var(--gold); background: var(--gold-glow); }
+    .btn-danger {
+      background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3);
+      color: #ef4444;
+    }
+    .btn-danger:hover { background: rgba(239,68,68,0.25); }
+    .btn-sm { padding: 0.35rem 0.8rem; font-size: 0.78rem; }
+    .btn-icon { padding: 0.45rem; width: 34px; height: 34px; justify-content: center; }
+
+    /* ============================================================
+       فلاتر وبحث
+       ============================================================ */
+    .filters-bar {
+      display: flex; align-items: center; gap: 0.8rem;
+      flex-wrap: wrap; margin-bottom: 1.4rem;
+    }
+    .search-input-wrap {
+      position: relative; flex: 1; min-width: 200px;
+    }
+    .search-input-wrap .search-icon {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      color: var(--text-dim); font-size: 1rem; pointer-events: none;
+    }
+    .form-input {
+      width: 100%; background: var(--glass); border: 1px solid var(--glass-border);
+      color: var(--text); border-radius: var(--radius-sm);
+      padding: 0.6rem 2.5rem 0.6rem 1rem;
+      font-family: 'Tajawal', sans-serif; font-size: 0.88rem;
+      transition: all var(--transition); outline: none;
+    }
+    .form-input:focus { border-color: var(--gold-border); box-shadow: 0 0 0 3px var(--gold-glow); }
+    .form-input::placeholder { color: var(--text-dim); }
+
+    .form-select {
+      background: var(--glass); border: 1px solid var(--glass-border);
+      color: var(--text); border-radius: var(--radius-sm);
+      padding: 0.6rem 1rem; font-family: 'Tajawal', sans-serif;
+      font-size: 0.88rem; cursor: pointer; outline: none;
+      transition: all var(--transition);
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23d4a84b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: left 0.8rem center;
+      padding-left: 2rem;
+    }
+    .form-select:focus { border-color: var(--gold-border); }
+    .form-select option { background: #1a1822; }
+
+    /* ============================================================
+       صفوف الطلبات - تفاصيل مرئية
+       ============================================================ */
+    .order-row-indicator {
+      width: 4px; height: 36px; border-radius: 2px; flex-shrink: 0;
+    }
+    .order-id { font-family: 'Outfit', sans-serif; font-size: 0.8rem; color: var(--text-dim); }
+    .order-customer { font-weight: 700; font-size: 0.9rem; }
+    .order-phone { font-size: 0.78rem; color: var(--text-muted); direction: ltr; text-align: right; }
+    .order-price { font-family: 'Outfit', sans-serif; font-weight: 800; color: var(--gold); }
+    .order-date { font-size: 0.78rem; color: var(--text-muted); }
+
+    /* قائمة تغيير الحالة */
+    .status-select-inline {
+      background: var(--glass); border: 1px solid var(--glass-border);
+      color: var(--text); border-radius: 6px; padding: 0.3rem 0.6rem;
+      font-family: 'Tajawal', sans-serif; font-size: 0.78rem; cursor: pointer;
+      outline: none; max-width: 140px;
+    }
+    .status-select-inline:focus { border-color: var(--gold-border); }
+    .status-select-inline option { background: #1a1822; }
+
+    /* ============================================================
+       بطاقات المنتجات (صفحة المنتجات)
+       ============================================================ */
+    .products-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.2rem;
+    }
+    .product-manage-card {
+      background: var(--glass); border: 1px solid var(--glass-border);
+      border-radius: var(--radius); padding: 1.4rem;
+      transition: all var(--transition); position: relative; overflow: hidden;
+    }
+    .product-manage-card::after {
+      content: ''; position: absolute; top: 0; right: 0;
+      width: 4px; height: 100%;
+      background: var(--prod-color, var(--gold));
+    }
+    .product-manage-card:hover {
+      border-color: var(--prod-border, var(--gold-border));
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    }
+    .prod-card-top { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.2rem; }
+    .prod-card-icon {
+      width: 50px; height: 50px; border-radius: 14px;
+      background: rgba(255,255,255,0.06); display: flex;
+      align-items: center; justify-content: center; font-size: 1.6rem;
+      border: 1px solid var(--prod-border, var(--glass-border));
+    }
+    .prod-card-name { font-size: 1.05rem; font-weight: 800; }
+    .prod-card-count { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+
+    .prod-price-row { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.8rem; }
+    .prod-price-label { font-size: 0.82rem; color: var(--text-muted); flex-shrink: 0; }
+    .prod-price-input {
+      background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border);
+      color: var(--gold); border-radius: 6px; padding: 0.35rem 0.7rem;
+      font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 800;
+      width: 90px; outline: none; text-align: left;
+      transition: all var(--transition);
+    }
+    .prod-price-input:focus { border-color: var(--gold-border); }
+    .prod-currency { font-size: 0.8rem; color: var(--text-dim); }
+
+    .prod-desc-input {
+      width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);
+      color: var(--text-muted); border-radius: 6px; padding: 0.5rem 0.8rem;
+      font-family: 'Tajawal', sans-serif; font-size: 0.82rem;
+      outline: none; resize: none; transition: all var(--transition);
+    }
+    .prod-desc-input:focus { border-color: var(--gold-border); }
+
+    .prod-card-footer { display: flex; justify-content: flex-end; margin-top: 1rem; gap: 0.6rem; }
+
+    /* ============================================================
+       العملاء
+       ============================================================ */
+    .customer-avatar-sm {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 0.9rem; flex-shrink: 0;
+      color: #000;
+    }
+    .customer-name { font-weight: 700; }
+    .customer-email { font-size: 0.78rem; color: var(--text-muted); }
+
+    /* ============================================================
+       صفحة الإعدادات
+       ============================================================ */
+    .settings-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 1.4rem;
+    }
+    .settings-card {
+      background: var(--glass); border: 1px solid var(--glass-border);
+      border-radius: var(--radius); overflow: hidden;
+    }
+    .settings-card-header {
+      padding: 1.1rem 1.4rem; border-bottom: 1px solid var(--glass-border);
+      display: flex; align-items: center; gap: 0.7rem;
+      background: rgba(255,255,255,0.02);
+    }
+    .settings-card-icon {
+      width: 34px; height: 34px; border-radius: 9px;
+      background: var(--gold-glow); border: 1px solid var(--gold-border);
+      display: flex; align-items: center; justify-content: center; font-size: 1rem;
+    }
+    .settings-card-title { font-weight: 800; font-size: 0.95rem; }
+    .settings-card-body { padding: 1.4rem; }
+
+    .form-group { margin-bottom: 1.1rem; }
+    .form-label { font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.4rem; display: block; }
+    .form-control {
+      width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border);
+      color: var(--text); border-radius: 8px; padding: 0.65rem 1rem;
+      font-family: 'Tajawal', sans-serif; font-size: 0.9rem;
+      outline: none; transition: all var(--transition);
+    }
+    .form-control:focus { border-color: var(--gold-border); box-shadow: 0 0 0 3px var(--gold-glow); }
+    .form-control::placeholder { color: var(--text-dim); }
+
+    .toggle-switch {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.7rem 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .toggle-switch:last-child { border-bottom: none; padding-bottom: 0; }
+    .toggle-label { font-size: 0.88rem; }
+    .toggle-desc { font-size: 0.74rem; color: var(--text-muted); }
+
+    .switch { position: relative; width: 42px; height: 24px; flex-shrink: 0; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer; inset: 0;
+      background: rgba(255,255,255,0.1); border-radius: 24px;
+      transition: var(--transition);
+    }
+    .slider::before {
+      content: ''; position: absolute;
+      height: 18px; width: 18px; left: 3px; bottom: 3px;
+      background: #fff; border-radius: 50%;
+      transition: var(--transition);
+    }
+    .switch input:checked + .slider { background: var(--gold); }
+    .switch input:checked + .slider::before { transform: translateX(18px); }
+
+    /* ============================================================
+       مودال تفاصيل الطلب
+       ============================================================ */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+      display: none; align-items: center; justify-content: center;
+      padding: 1.5rem;
+    }
+    .modal-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+
+    .modal-box {
+      background: #111018; border: 1px solid var(--gold-border);
+      border-radius: 18px; max-width: 640px; width: 100%;
+      max-height: 85vh; overflow-y: auto;
+      box-shadow: 0 25px 80px rgba(0,0,0,0.6);
+      animation: slideUp 0.3s cubic-bezier(0.25,1,0.5,1);
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-header {
+      padding: 1.4rem 1.6rem; border-bottom: 1px solid var(--gold-border);
+      display: flex; align-items: center; gap: 0.8rem;
+    }
+    .modal-title { font-size: 1.1rem; font-weight: 900; }
+    .modal-close {
+      margin-right: auto; background: transparent; border: none;
+      color: var(--text-muted); cursor: pointer; font-size: 1.4rem;
+      transition: color var(--transition); padding: 0.2rem;
+    }
+    .modal-close:hover { color: #ef4444; }
+    .modal-body { padding: 1.6rem; }
+
+    .detail-row {
+      display: flex; align-items: flex-start; gap: 1rem;
+      padding: 0.7rem 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-key { font-size: 0.8rem; color: var(--text-dim); width: 120px; flex-shrink: 0; font-weight: 600; }
+    .detail-val { font-size: 0.88rem; flex: 1; }
+
+    .design-preview-img {
+      width: 100%; border-radius: 10px; border: 1px solid var(--glass-border);
+      margin-top: 1rem; object-fit: contain; max-height: 200px; background: #000;
+    }
+
+    /* ============================================================
+       حالة التحميل والفراغ
+       ============================================================ */
+    .loading-state {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 3rem; gap: 1rem;
+      color: var(--text-muted);
+    }
+    .spinner {
+      width: 36px; height: 36px; border: 3px solid var(--glass-border);
+      border-top-color: var(--gold); border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .empty-state {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 3rem; gap: 0.6rem; color: var(--text-muted);
+    }
+    .empty-icon { font-size: 2.5rem; opacity: 0.4; }
+    .empty-title { font-size: 0.95rem; font-weight: 700; }
+    .empty-desc { font-size: 0.82rem; color: var(--text-dim); }
+
+    /* ============================================================
+       إشعار طلب جديد (Toast)
+       ============================================================ */
+    #toast-container {
+      position: fixed; top: 1.5rem; left: 1.5rem;
+      z-index: 9999; display: flex; flex-direction: column; gap: 0.8rem;
+      pointer-events: none;
+    }
+    .toast {
+      background: #111018; border: 1px solid var(--gold-border);
+      border-radius: 12px; padding: 1rem 1.2rem;
+      display: flex; align-items: center; gap: 0.8rem;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+      animation: slideInLeft 0.4s cubic-bezier(0.25,1,0.5,1) forwards;
+      pointer-events: auto; max-width: 320px; min-width: 260px;
+    }
+    .toast.removing { animation: slideOutLeft 0.3s ease forwards; }
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-30px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes slideOutLeft {
+      to { opacity: 0; transform: translateX(-30px); }
+    }
+    .toast-icon { font-size: 1.3rem; flex-shrink: 0; }
+    .toast-msg { font-size: 0.85rem; font-weight: 600; }
+    .toast-sub { font-size: 0.74rem; color: var(--text-muted); margin-top: 2px; }
+    .toast-new { border-color: var(--gold); }
+
+    /* ============================================================
+       الطبقة الزجاجية للخلفية الذهبية
+       ============================================================ */
+    .gold-glow-card {
+      border-color: var(--gold-border) !important;
+      box-shadow: 0 0 30px var(--gold-glow);
+    }
+
+    /* ============================================================
+       شريط تقدم (للإحصائيات)
+       ============================================================ */
+    .progress-bar-wrap { margin-top: 0.4rem; }
+    .progress-bar-bg {
+      height: 4px; border-radius: 99px;
+      background: rgba(255,255,255,0.06); overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%; border-radius: 99px;
+      background: var(--bar-color, var(--gold));
+      transition: width 1s cubic-bezier(0.25,1,0.5,1);
+    }
+
+    /* ============================================================
+       قائمة أحدث الطلبات (Dashboard)
+       ============================================================ */
+    .recent-order-item {
+      display: flex; align-items: center; gap: 0.9rem;
+      padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+      transition: background var(--transition); border-radius: 6px;
+    }
+    .recent-order-item:last-child { border-bottom: none; }
+    .recent-order-item:hover { background: var(--glass); padding-right: 0.5rem; }
+
+    .recent-prod-dot {
+      width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+    }
+    .recent-order-name { font-weight: 700; font-size: 0.88rem; flex: 1; }
+    .recent-order-prod { font-size: 0.78rem; color: var(--text-muted); }
+    .recent-order-price { font-family: 'Outfit', sans-serif; font-weight: 800; color: var(--gold); font-size: 0.9rem; }
+    .recent-order-time { font-size: 0.72rem; color: var(--text-dim); }
+
+    /* ============================================================
+       شريط توزيع المنتجات
+       ============================================================ */
+    .product-dist-item {
+      display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.9rem;
+    }
+    .product-dist-item:last-child { margin-bottom: 0; }
+    .dist-icon { font-size: 1rem; flex-shrink: 0; }
+    .dist-name { font-size: 0.85rem; flex: 1; }
+    .dist-count { font-size: 0.8rem; color: var(--text-muted); min-width: 30px; text-align: left; }
+    .dist-bar-wrap { flex: 2; }
+    .dist-bar {
+      height: 6px; border-radius: 99px; overflow: hidden;
+      background: rgba(255,255,255,0.06);
+    }
+    .dist-bar-fill { height: 100%; border-radius: 99px; transition: width 1.2s cubic-bezier(0.25,1,0.5,1); }
+
+    /* ============================================================
+       Responsive
+       ============================================================ */
+    @media (max-width: 768px) {
+      #sidebar { position: fixed; height: 100vh; z-index: 200; transform: translateX(100%); }
+      #sidebar.mobile-open { transform: translateX(0); }
+      #main-area { width: 100%; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .charts-grid { grid-template-columns: 1fr; }
+      .products-grid { grid-template-columns: 1fr; }
+      .settings-grid { grid-template-columns: 1fr; }
+      #page-content { padding: 1.2rem; }
+      .data-table { font-size: 0.8rem; }
+      .data-table thead th,
+      .data-table tbody td { padding: 0.6rem 0.7rem; }
+    }
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ============================================================
+       الصفحة الإجمالية - انيميشن ظهور أولي
+       ============================================================ */
+    body { opacity: 0; animation: bodyAppear 0.5s ease 0.2s forwards; }
+    @keyframes bodyAppear { to { opacity: 1; } }
+
+    /* ============================================================
+       شريط الأيام (مرفق للوحة المعلومات)
+       ============================================================ */
+    .day-tabs {
+      display: flex; gap: 0.4rem; background: var(--glass);
+      border: 1px solid var(--glass-border); border-radius: 8px; padding: 3px;
+    }
+    .day-tab {
+      padding: 0.3rem 0.8rem; border-radius: 6px; font-size: 0.78rem; font-weight: 700;
+      cursor: pointer; transition: all var(--transition); color: var(--text-muted);
+    }
+    .day-tab.active { background: var(--gold); color: #000; }
+    .day-tab:not(.active):hover { color: var(--gold); }
+
+    /* ============================================================
+       علامة جديد (نبض)
+       ============================================================ */
+    .new-pulse {
+      display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+      background: var(--gold);
+      animation: pulseDot 1.5s ease-in-out infinite;
+    }
+    @keyframes pulseDot {
+      0%,100% { box-shadow: 0 0 0 0 rgba(212,168,75,0.5); }
+      50%      { box-shadow: 0 0 0 5px rgba(212,168,75,0); }
+    }
+
+    /* pagination */
+    .pagination {
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      padding: 1rem 0;
+    }
+    .page-btn {
+      min-width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--glass-border);
+      background: var(--glass); color: var(--text-muted); cursor: pointer;
+      font-family: 'Tajawal', sans-serif; font-size: 0.85rem; display: flex;
+      align-items: center; justify-content: center; transition: all var(--transition);
+    }
+    .page-btn:hover, .page-btn.active { border-color: var(--gold-border); color: var(--gold); background: var(--gold-glow); }
+    .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    /* mobile overlay */
+    #sidebar-overlay {
+      display: none; position: fixed; inset: 0; z-index: 199;
+      background: rgba(0,0,0,0.55); backdrop-filter: blur(2px);
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- خلفية الكرات -->
+<div class="orbs-bg" aria-hidden="true">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<!-- تغطية الجوال للقائمة -->
+<div id="sidebar-overlay"></div>
+
+<!-- ============================================================
+     الشريط الجانبي
+     ============================================================ -->
+<nav id="sidebar" aria-label="القائمة الجانبية">
+
+  <!-- رأس الشريط الجانبي -->
+  <div class="sidebar-header">
+    <div class="sidebar-icon-mark">💎</div>
+    <span class="sidebar-logo">أزمـا | إدارة</span>
+    <button class="toggle-sidebar-btn" id="toggleSidebarBtn" title="طي القائمة">◀</button>
+  </div>
+
+  <!-- قائمة التنقل -->
+  <div class="sidebar-nav">
+    <div class="nav-section-title">الرئيسية</div>
+
+    <div class="nav-item active" data-page="dashboard" id="nav-dashboard">
+      <span class="nav-icon">📊</span>
+      <span class="nav-label">لوحة المعلومات</span>
+    </div>
+    <div class="nav-item" data-page="orders" id="nav-orders">
+      <span class="nav-icon">📦</span>
+      <span class="nav-label">إدارة الطلبات</span>
+      <span class="nav-badge" id="new-orders-badge" style="display:none">0</span>
+    </div>
+
+    <div class="nav-section-title" style="margin-top:0.8rem">الإدارة</div>
+
+    <div class="nav-item" data-page="customers" id="nav-customers">
+      <span class="nav-icon">👤</span>
+      <span class="nav-label">العملاء</span>
+    </div>
+    <div class="nav-item" data-page="products" id="nav-products">
+      <span class="nav-icon">🏷️</span>
+      <span class="nav-label">المنتجات</span>
+    </div>
+
+    <div class="nav-section-title" style="margin-top:0.8rem">النظام</div>
+
+    <div class="nav-item" data-page="settings" id="nav-settings">
+      <span class="nav-icon">⚙️</span>
+      <span class="nav-label">الإعدادات</span>
+    </div>
+  </div>
+
+  <!-- معلومات المستخدم -->
+  <div class="sidebar-user">
+    <div class="user-avatar" id="userAvatarLetter">م</div>
+    <div class="user-info">
+      <div class="user-name" id="sidebarUserName">المدير</div>
+      <div class="user-role">مدير النظام ✦</div>
+    </div>
+    <button class="logout-btn" id="logoutBtn">خروج</button>
+  </div>
+
+</nav>
+
+<!-- ============================================================
+     المنطقة الرئيسية
+     ============================================================ -->
+<div id="main-area">
+
+  <!-- شريط الرأس العلوي -->
+  <header id="topbar">
+    <!-- زر فتح القائمة (جوال) -->
+    <button id="mobileMenuBtn" style="display:none;background:transparent;border:none;cursor:pointer;font-size:1.3rem;color:var(--text-muted);">☰</button>
+
+    <div>
+      <div class="topbar-title" id="topbarTitle">لوحة المعلومات</div>
+      <div class="topbar-subtitle" id="topbarSubtitle">مرحباً بك في مركز إدارة أزما</div>
+    </div>
+
+    <div class="topbar-right">
+      <div class="topbar-time" id="topbarClock">--:--:--</div>
+      <div class="notification-bell" id="notifBell" title="الإشعارات">
+        🔔
+        <div class="notif-dot" id="notifDot" style="display:none;"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- منطقة المحتوى -->
+  <main id="page-content">
+
+    <!-- ================================================================
+         صفحة 1: لوحة المعلومات
+         ================================================================ -->
+    <section id="page-dashboard" class="page active">
+
+      <!-- إحصائيات سريعة -->
+      <div class="stats-grid" id="statsGrid">
+        <!-- تُملأ ديناميكياً -->
+        <div class="stat-card gold-glow-card" style="--card-color:var(--gold)">
+          <div class="stat-top">
+            <div class="stat-icon" style="background:rgba(212,168,75,0.15)">📦</div>
+            <span class="stat-change neutral">⟳</span>
+          </div>
+          <div class="stat-value" id="stat-total">—</div>
+          <div class="stat-label">إجمالي الطلبات</div>
+          <div class="stat-sub">جميع الطلبات المسجلة</div>
+        </div>
+        <div class="stat-card" style="--card-color:var(--s-new)">
+          <div class="stat-top">
+            <div class="stat-icon" style="background:rgba(59,130,246,0.15)">🆕</div>
+            <span class="stat-change up" id="stat-new-change">جديد</span>
+          </div>
+          <div class="stat-value" id="stat-new" style="color:var(--s-new)">—</div>
+          <div class="stat-label">طلبات جديدة</div>
+          <div class="stat-sub">تحتاج مراجعة</div>
+        </div>
+        <div class="stat-card" style="--card-color:var(--s-process)">
+          <div class="stat-top">
+            <div class="stat-icon" style="background:rgba(245,158,11,0.15)">⚙️</div>
+            <span class="stat-change neutral">قيد</span>
+          </div>
+          <div class="stat-value" id="stat-process" style="color:var(--s-process)">—</div>
+          <div class="stat-label">قيد التجهيز</div>
+          <div class="stat-sub">طلبات في المعالجة</div>
+        </div>
+        <div class="stat-card" style="--card-color:var(--s-delivered)">
+          <div class="stat-top">
+            <div class="stat-icon" style="background:rgba(34,197,94,0.15)">✅</div>
+            <span class="stat-change up">مكتمل</span>
+          </div>
+          <div class="stat-value" id="stat-delivered" style="color:var(--s-delivered)">—</div>
+          <div class="stat-label">طلبات مكتملة</div>
+          <div class="stat-sub">تم التوصيل بنجاح</div>
+        </div>
+        <div class="stat-card" style="--card-color:var(--gold)">
+          <div class="stat-top">
+            <div class="stat-icon" style="background:rgba(212,168,75,0.15)">💰</div>
+            <span class="stat-change up">JOD</span>
+          </div>
+          <div class="stat-value" id="stat-revenue" style="color:var(--gold)">—</div>
+          <div class="stat-label">إجمالي الإيرادات</div>
+          <div class="stat-sub">دينار أردني</div>
+        </div>
+        <div class="stat-card" style="--card-color:var(--s-new)">
+          <div class="stat-top">
+            <div class="stat-icon" style="background:rgba(59,130,246,0.15)">🆕</div>
+            <span class="stat-change up" id="stat-today-change">اليوم</span>
+          </div>
+          <div class="stat-value" id="stat-today" style="color:var(--s-new)">—</div>
+          <div class="stat-label">طلبات اليوم</div>
+          <div class="stat-sub">الطلبات الجديدة اليوم</div>
+        </div>
+        <div class="stat-card" style="--card-color:#8b5cf6">
+          <div class="stat-top">
+            <div class="stat-icon" style="background:rgba(139,92,246,0.15)">👤</div>
+          </div>
+          <div class="stat-value" id="stat-customers" style="color:#8b5cf6">—</div>
+          <div class="stat-label">إجمالي العملاء</div>
+          <div class="stat-sub">عملاء فريدين مسجلين</div>
+        </div>
+      </div>
+
+      <!-- الرسوم البيانية -->
+      <div class="charts-grid">
+        <!-- مخطط الطلبات الأسبوعية -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">📈 الطلبات بمرور الوقت</div>
+              <div class="card-subtitle">آخر 7 أيام</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="chart-wrapper">
+              <canvas id="ordersChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- توزيع المنتجات -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">🏷️ توزيع المنتجات</div>
+              <div class="card-subtitle">حسب عدد الطلبات</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div id="productDistList">
+              <!-- تُملأ ديناميكياً -->
+              <div class="loading-state"><div class="spinner"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- أحدث الطلبات -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">🕐 أحدث الطلبات</div>
+            <div class="card-subtitle">آخر 10 طلبات واردة</div>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-glass btn-sm" onclick="navigateTo('orders')">عرض الكل</button>
+          </div>
+        </div>
+        <div class="card-body" style="padding-top:0.4rem;padding-bottom:0.4rem;">
+          <div id="recentOrdersList">
+            <div class="loading-state"><div class="spinner"></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         صفحة 2: إدارة الطلبات
+         ================================================================ -->
+    <section id="page-orders" class="page">
+
+      <!-- فلاتر -->
+      <div class="filters-bar">
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="form-input" id="orderSearch" placeholder="ابحث بالاسم أو رقم الهاتف..." />
+        </div>
+        <select class="form-select" id="filterStatus">
+          <option value="">كل الحالات</option>
+          <option value="جديد">جديد</option>
+          <option value="قيد التجهيز">قيد التجهيز</option>
+          <option value="جاهز للشحن">جاهز للشحن</option>
+          <option value="تم التوصيل">تم التوصيل</option>
+          <option value="ملغي">ملغي</option>
+        </select>
+        <select class="form-select" id="filterProduct">
+          <option value="">كل المنتجات</option>
+          <option value="tshirt">👕 تيشيرت</option>
+          <option value="mug">☕ كوب</option>
+          <option value="cap">🧢 طاقية</option>
+          <option value="pillow">🛏️ مخدة</option>
+          <option value="stickers">🏷️ ملصقات</option>
+          <option value="frame">🖼️ برواز</option>
+        </select>
+        <button class="btn btn-gold btn-sm" id="exportOrdersBtn">⬇️ تصدير</button>
+        <button class="btn btn-gold btn-sm" id="pdfExportBtn" style="background:linear-gradient(135deg,#8b5cf6,#d4a84b);">📄 كشف PDF</button>
+      </div>
+
+      <!-- جدول الطلبات -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">📦 قائمة الطلبات</div>
+            <div class="card-subtitle" id="ordersCountLabel">جاري التحميل...</div>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>المنتج</th>
+                <th>العميل</th>
+                <th>الهاتف</th>
+                <th>السعر</th>
+                <th>الحالة</th>
+                <th>التاريخ</th>
+                <th>إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody">
+              <tr><td colspan="7"><div class="loading-state"><div class="spinner"></div><span>جاري تحميل الطلبات...</span></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination" id="ordersPagination"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         صفحة 3: العملاء
+         ================================================================ -->
+    <section id="page-customers" class="page">
+
+      <div class="filters-bar">
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="form-input" id="customerSearch" placeholder="ابحث بالاسم أو الهاتف..." />
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">👤 قائمة العملاء</div>
+            <div class="card-subtitle" id="customersCountLabel">جاري التحميل...</div>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>العميل</th>
+                <th>رقم الهاتف</th>
+                <th>عدد الطلبات</th>
+                <th>إجمالي الإنفاق</th>
+                <th>آخر نشاط</th>
+                <th>المنتج الأكثر طلباً</th>
+              </tr>
+            </thead>
+            <tbody id="customersTableBody">
+              <tr><td colspan="6"><div class="loading-state"><div class="spinner"></div><span>جاري تحميل بيانات العملاء...</span></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================
+         صفحة 4: المنتجات
+         ================================================================ -->
+    <section id="page-products" class="page">
+
+      <div style="margin-bottom:1.4rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.8rem;">
+        <div>
+          <div style="font-size:1rem;font-weight:800;">🏷️ إدارة المنتجات وأسعارها</div>
+          <div style="font-size:0.8rem;color:var(--text-muted);margin-top:3px;">تعديل الأسعار والأوصاف يحفظ تلقائياً في Firestore</div>
+        </div>
+        <button class="btn btn-gold" id="saveAllProductsBtn">💾 حفظ جميع التغييرات</button>
+      </div>
+
+      <div class="products-grid" id="productsGrid">
+        <!-- تُملأ ديناميكياً -->
+      </div>
+    </section>
+
+    <!-- ================================================================
+         صفحة 5: الإعدادات
+         ================================================================ -->
+    <section id="page-settings" class="page">
+
+      <div style="margin-bottom:1.4rem;">
+        <div style="font-size:1rem;font-weight:800;">⚙️ إعدادات المنصة</div>
+        <div style="font-size:0.8rem;color:var(--text-muted);margin-top:3px;">تُحفظ الإعدادات في مستند <code style="background:var(--glass);padding:1px 5px;border-radius:4px;">admin_settings</code> في Firestore</div>
+      </div>
+
+      <div class="settings-grid">
+
+        <!-- معلومات المتجر -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div class="settings-card-icon">🏪</div>
+            <div class="settings-card-title">معلومات المتجر</div>
+          </div>
+          <div class="settings-card-body">
+            <div class="form-group">
+              <label class="form-label">اسم المتجر</label>
+              <input type="text" class="form-control" id="set-storeName" placeholder="أزما للتصميم الفاخر" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">البريد الإلكتروني</label>
+              <input type="email" class="form-control" id="set-storeEmail" placeholder="info@azma.jo" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">رقم الهاتف</label>
+              <input type="text" class="form-control" id="set-storePhone" placeholder="+962 7X XXX XXXX" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">العنوان</label>
+              <input type="text" class="form-control" id="set-storeAddress" placeholder="عمّان، الأردن" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">العملة</label>
+              <select class="form-control" id="set-currency">
+                <option value="JOD">دينار أردني (JOD)</option>
+                <option value="USD">دولار أمريكي (USD)</option>
+                <option value="SAR">ريال سعودي (SAR)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- إعدادات الشحن -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div class="settings-card-icon">🚚</div>
+            <div class="settings-card-title">إعدادات الشحن</div>
+          </div>
+          <div class="settings-card-body">
+            <div class="form-group">
+              <label class="form-label">رسوم الشحن الافتراضية (JOD)</label>
+              <input type="number" class="form-control" id="set-shippingFee" placeholder="2.50" step="0.5" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">الحد الأدنى للشحن المجاني (JOD)</label>
+              <input type="number" class="form-control" id="set-freeShippingMin" placeholder="20" step="1" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">مدة التوصيل المتوقعة</label>
+              <input type="text" class="form-control" id="set-deliveryTime" placeholder="2-5 أيام عمل" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">المناطق المدعومة</label>
+              <input type="text" class="form-control" id="set-regions" placeholder="عمّان، إربد، الزرقاء..." />
+            </div>
+            <div style="margin-top:1rem;">
+              <div class="toggle-switch">
+                <div>
+                  <div class="toggle-label">شحن مجاني للطلبات الكبيرة</div>
+                  <div class="toggle-desc">فوق الحد المعين أعلاه</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="set-freeShipping" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- إعدادات الإشعارات -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div class="settings-card-icon">🔔</div>
+            <div class="settings-card-title">إعدادات الإشعارات</div>
+          </div>
+          <div class="settings-card-body">
+            <div class="toggle-switch">
+              <div>
+                <div class="toggle-label">🔔 إشعار بالطلبات الجديدة</div>
+                <div class="toggle-desc">إشعار فوري عند وصول طلب جديد</div>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="set-notifNewOrder" checked />
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="toggle-switch">
+              <div>
+                <div class="toggle-label">🔊 صوت عند الطلب الجديد</div>
+                <div class="toggle-desc">تنبيه صوتي عند وصول طلب</div>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="set-notifSound" checked />
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="toggle-switch">
+              <div>
+                <div class="toggle-label">✅ إشعار عند اكتمال الطلب</div>
+                <div class="toggle-desc">تنبيه عند تغيير الحالة لـ"مكتمل"</div>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="set-notifComplete" />
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="toggle-switch">
+              <div>
+                <div class="toggle-label">❌ إشعار عند إلغاء الطلب</div>
+                <div class="toggle-desc">تنبيه عند إلغاء أي طلب</div>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="set-notifCancel" />
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- إعدادات النظام -->
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div class="settings-card-icon">🔧</div>
+            <div class="settings-card-title">إعدادات النظام</div>
+          </div>
+          <div class="settings-card-body">
+            <div class="form-group">
+              <label class="form-label">رسالة الترحيب للعملاء</label>
+              <input type="text" class="form-control" id="set-welcomeMsg" placeholder="مرحباً بك في أزما!" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">رسالة تأكيد الطلب</label>
+              <input type="text" class="form-control" id="set-orderConfirmMsg" placeholder="تم استلام طلبك، سنتواصل معك قريباً!" />
+            </div>
+            <div style="margin-top:0.8rem;">
+              <div class="toggle-switch">
+                <div>
+                  <div class="toggle-label">🚦 قبول الطلبات الجديدة</div>
+                  <div class="toggle-desc">إيقاف لإغلاق المتجر مؤقتاً</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="set-acceptOrders" checked />
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="toggle-switch">
+                <div>
+                  <div class="toggle-label">🌙 وضع الصيانة</div>
+                  <div class="toggle-desc">إخفاء الموقع للزوار مؤقتاً</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="set-maintenance" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+            <button class="btn btn-gold" style="width:100%;margin-top:1.2rem;justify-content:center;" id="saveSettingsBtn">
+              💾 حفظ جميع الإعدادات
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ============================================================
+     مودال تفاصيل الطلب
+     ============================================================ -->
+<div class="modal-overlay" id="orderModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span style="font-size:1.3rem;">📦</span>
+      <div class="modal-title" id="modalOrderTitle">تفاصيل الطلب</div>
+      <button class="modal-close" id="closeModal">✕</button>
+    </div>
+    <div class="modal-body" id="modalOrderBody">
+      <!-- تُملأ ديناميكياً -->
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     حاوية الإشعارات (Toast)
+     ============================================================ -->
+<div id="toast-container" aria-live="polite"></div>
+
+<!-- ============================================================
+     السكريبت الرئيسي
+     ============================================================ -->
+<script>
+/* ================================================================
+   إعدادات Firebase
+   ================================================================ */
+const firebaseConfig = {
+  apiKey:            "AIzaSyFakeKey-Placeholder123456789",
+  authDomain:        "azma-design.firebaseapp.com",
+  projectId:         "azma-design",
+  storageBucket:     "azma-design.appspot.com",
+  messagingSenderId: "123456789012",
+  appId:             "1:123456789012:web:abcdef123456789"
+};
+
+// تهيئة Firebase
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db   = firebase.firestore();
+
+/* ================================================================
+   ثوابت وبيانات المنتجات
+   ================================================================ */
+const PRODUCTS = {
+  tshirt:   { name: 'تيشيرت',  icon: '👕', color: '#3b82f6', border: 'rgba(59,130,246,0.3)'  },
+  mug:      { name: 'كوب',     icon: '☕', color: '#ef4444', border: 'rgba(239,68,68,0.3)'   },
+  cap:      { name: 'طاقية',   icon: '🧢', color: '#8b5cf6', border: 'rgba(139,92,246,0.3)'  },
+  pillow:   { name: 'مخدة',    icon: '🛏️', color: '#22c55e', border: 'rgba(34,197,94,0.3)'   },
+  stickers: { name: 'ملصقات', icon: '🏷️', color: '#f59e0b', border: 'rgba(245,158,11,0.3)'  },
+  frame:    { name: 'برواز',   icon: '🖼️', color: '#ec4899', border: 'rgba(236,72,153,0.3)'  },
+};
+
+const STATUSES = {
+  'جديد':           { cls: 'badge-new',       dot: '#3b82f6' },
+  'قيد التجهيز':    { cls: 'badge-process',   dot: '#f59e0b' },
+  'جاهز للشحن':     { cls: 'badge-ready',     dot: '#8b5cf6' },
+  'تم التوصيل':     { cls: 'badge-delivered', dot: '#22c55e' },
+  'ملغي':           { cls: 'badge-cancelled', dot: '#ef4444' },
+};
+
+const CUSTOMER_COLORS = ['#3b82f6','#ef4444','#8b5cf6','#22c55e','#f59e0b','#ec4899','#06b6d4','#84cc16'];
+
+/* ================================================================
+   حالة التطبيق
+   ================================================================ */
+let allOrders       = [];
+let filteredOrders  = [];
+let currentPage     = 1;
+const PAGE_SIZE     = 15;
+let ordersListener  = null;
+let chartsReady     = false;
+let ordersChartInst = null;
+let prevOrderCount  = -1;
+let currentUser     = null;
+
+/* ================================================================
+   أدوات مساعدة
+   ================================================================ */
+function formatDate(ts) {
+  if (!ts) return '—';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  const now = new Date();
+  const diff = Math.floor((now - d) / 1000);
+  if (diff < 60)    return 'الآن';
+  if (diff < 3600)  return `منذ ${Math.floor(diff/60)} د`;
+  if (diff < 86400) return `منذ ${Math.floor(diff/3600)} س`;
+  return d.toLocaleDateString('ar-JO', { day:'numeric', month:'short', year:'numeric' });
+}
+
+function formatDateFull(ts) {
+  if (!ts) return '—';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleString('ar-JO', { day:'numeric', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+
+function formatPrice(val) {
+  const n = parseFloat(val) || 0;
+  return n.toFixed(3) + ' د.أ';
+}
+
+function getProdInfo(key) {
+  return PRODUCTS[key] || { name: key || 'منتج', icon: '📦', color: '#d4a84b', border: 'rgba(212,168,75,0.3)' };
+}
+
+function getStatusInfo(s) {
+  return STATUSES[s] || { cls: 'badge-neutral', dot: '#aaa' };
+}
+
+function escHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function slugify(s) {
+  return String(s || '').toLowerCase().trim();
+}
+
+/* ================================================================
+   Toast (إشعارات)
+   ================================================================ */
+function showToast(msg, sub = '', isNew = false) {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = 'toast' + (isNew ? ' toast-new' : '');
+  toast.innerHTML = `
+    <span class="toast-icon">${isNew ? '📦' : '✨'}</span>
+    <div>
+      <div class="toast-msg">${escHtml(msg)}</div>
+      ${sub ? `<div class="toast-sub">${escHtml(sub)}</div>` : ''}
+    </div>`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add('removing');
+    setTimeout(() => toast.remove(), 350);
+  }, isNew ? 6000 : 4000);
+}
+
+/* ================================================================
+   صوت الإشعار
+   ================================================================ */
+function playNotifSound() {
+  try {
+    const soundEnabled = document.getElementById('set-notifSound')?.checked;
+    if (!soundEnabled) return;
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const notes = [523.25, 659.25, 783.99, 1046.50];
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.12);
+      gain.gain.linearRampToValueAtTime(0.18, ctx.currentTime + i * 0.12 + 0.06);
+      gain.gain.linearRampToValueAtTime(0, ctx.currentTime + i * 0.12 + 0.3);
+      osc.start(ctx.currentTime + i * 0.12);
+      osc.stop(ctx.currentTime + i * 0.12 + 0.35);
+    });
+  } catch(_) {}
+}
+
+/* ================================================================
+   الساعة
+   ================================================================ */
+function startClock() {
+  const el = document.getElementById('topbarClock');
+  function tick() {
+    const now = new Date();
+    el.textContent = now.toLocaleTimeString('ar-JO', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  }
+  tick();
+  setInterval(tick, 1000);
+}
+
+/* ================================================================
+   التنقل بين الصفحات
+   ================================================================ */
+const PAGE_TITLES = {
+  dashboard: { title: 'لوحة المعلومات',   sub: 'نظرة شاملة على أداء المتجر' },
+  orders:    { title: 'إدارة الطلبات',    sub: 'تتبع وإدارة جميع طلبات العملاء' },
+  customers: { title: 'العملاء',           sub: 'قائمة وبيانات جميع العملاء المسجلين' },
+  products:  { title: 'المنتجات',          sub: 'إدارة الأسعار والأوصاف' },
+  settings:  { title: 'الإعدادات',         sub: 'إعدادات المتجر والنظام' },
+};
+
+function navigateTo(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  const page = document.getElementById(`page-${pageId}`);
+  const navItem = document.getElementById(`nav-${pageId}`);
+  if (page)    page.classList.add('active');
+  if (navItem) navItem.classList.add('active');
+
+  const t = PAGE_TITLES[pageId] || {};
+  document.getElementById('topbarTitle').textContent   = t.title || pageId;
+  document.getElementById('topbarSubtitle').textContent = t.sub || '';
+
+  // حفظ الصفحة الحالية
+  localStorage.setItem('azma_admin_page', pageId);
+
+  // تفعيل خاص
+  if (pageId === 'dashboard') renderDashboard();
+  if (pageId === 'customers') renderCustomers();
+  if (pageId === 'products')  renderProductCards();
+  if (pageId === 'settings')  loadSettings();
+
+  // إغلاق الجوال
+  closeMobileSidebar();
+}
+
+/* ================================================================
+   الشريط الجانبي
+   ================================================================ */
+document.getElementById('toggleSidebarBtn').addEventListener('click', () => {
+  document.getElementById('sidebar').classList.toggle('collapsed');
+});
+
+function closeMobileSidebar() {
+  document.getElementById('sidebar').classList.remove('mobile-open');
+  document.getElementById('sidebar-overlay').style.display = 'none';
+}
+
+document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+  document.getElementById('sidebar').classList.add('mobile-open');
+  document.getElementById('sidebar-overlay').style.display = 'block';
+});
+
+document.getElementById('sidebar-overlay').addEventListener('click', closeMobileSidebar);
+
+// إظهار زر الجوال على شاشات صغيرة
+if (window.innerWidth <= 768) {
+  document.getElementById('mobileMenuBtn').style.display = 'block';
+}
+window.addEventListener('resize', () => {
+  document.getElementById('mobileMenuBtn').style.display = window.innerWidth <= 768 ? 'block' : 'none';
+});
+
+// روابط التنقل
+document.querySelectorAll('.nav-item[data-page]').forEach(item => {
+  item.addEventListener('click', () => navigateTo(item.dataset.page));
+});
+
+/* ================================================================
+   Firebase Auth
+   ================================================================ */
+auth.onAuthStateChanged(user => {
+  currentUser = user;
+  if (user) {
+    const name = user.displayName || user.email || 'المدير';
+    const letter = name.charAt(0).toUpperCase();
+    document.getElementById('sidebarUserName').textContent = name.split(' ')[0];
+    document.getElementById('userAvatarLetter').textContent = letter;
+  }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  auth.signOut().then(() => {
+    showToast('تم تسجيل الخروج بنجاح', 'إلى اللقاء! 👋');
+    setTimeout(() => { window.location.href = 'index.html'; }, 1500);
+  }).catch(err => showToast('خطأ في تسجيل الخروج', err.message));
+});
+
+/* ================================================================
+   الاستماع للطلبات (onSnapshot)
+   ================================================================ */
+function startOrdersListener() {
+  if (ordersListener) return;
+  ordersListener = db.collection('orders')
+    .orderBy('createdAt', 'desc')
+    .onSnapshot(snap => {
+      allOrders = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      // كشف طلبات جديدة
+      if (prevOrderCount >= 0 && allOrders.length > prevOrderCount) {
+        const diff = allOrders.length - prevOrderCount;
+        const newest = allOrders[0];
+        const prod = getProdInfo(newest?.productType);
+        playNotifSound();
+        showToast(
+          `طلب جديد وصل! ${prod.icon}`,
+          `${newest?.userName || 'عميل'} — ${prod.name}`,
+          true
+        );
+        document.getElementById('notifDot').style.display = 'block';
+      }
+      prevOrderCount = allOrders.length;
+
+      // تحديث شارة الطلبات الجديدة
+      const newCount = allOrders.filter(o => o.status === 'جديد').length;
+      const badge = document.getElementById('new-orders-badge');
+      if (newCount > 0) {
+        badge.textContent = newCount;
+        badge.style.display = '';
+      } else {
+        badge.style.display = 'none';
+      }
+
+      applyFilters();
+      renderDashboard();
+    }, err => {
+      console.warn('Firestore error:', err);
+      // عرض بيانات وهمية للعرض التجريبي
+      loadDemoData();
+    });
+}
+
+/* ================================================================
+   بيانات تجريبية (للعرض بدون Firebase)
+   ================================================================ */
+function loadDemoData() {
+  const names = ['محمد العمري','فاطمة الزهراني','أحمد الخالدي','سارة النجار','خالد البطاح','ريم المنصور','عبدالله الحربي','نورة السعيد'];
+  const phones = ['+962791234567','+962798765432','+962799112233','+962792223344','+962796667788'];
+  const statuses = ['جديد','قيد التجهيز','جاهز للشحن','تم التوصيل','ملغي'];
+  const prods = ['tshirt','mug','cap','pillow','stickers','frame'];
+
+  allOrders = Array.from({length: 42}, (_, i) => {
+    const prod = prods[i % prods.length];
+    const name = names[i % names.length];
+    const status = statuses[i % statuses.length];
+    const price = (5 + Math.random()*25).toFixed(3);
+    const daysAgo = Math.floor(Math.random() * 30);
+    const dt = new Date(); dt.setDate(dt.getDate() - daysAgo);
+    return {
+      id: `DEMO${String(i+1).padStart(4,'0')}`,
+      userName: name, userPhone: phones[i % phones.length],
+      productType: prod, status,
+      totalPrice: parseFloat(price),
+      createdAt: { toDate: () => dt },
+      designText: i % 3 === 0 ? 'تصميم خاص بالعميل' : '',
+      options: { size: 'L', color: 'أسود', material: 'قطن', printType: 'حرارة', quantity: (i % 3)+1 },
+    };
+  });
+  prevOrderCount = allOrders.length;
+
+  const newCount = allOrders.filter(o => o.status === 'جديد').length;
+  const badge = document.getElementById('new-orders-badge');
+  badge.textContent = newCount;
+  badge.style.display = newCount ? '' : 'none';
+
+  applyFilters();
+  renderDashboard();
+  showToast('وضع العرض التجريبي', 'لا يوجد اتصال بـ Firebase — تعرض بيانات تجريبية');
+}
+
+/* ================================================================
+   فلترة الطلبات
+   ================================================================ */
+function applyFilters() {
+  const searchQ  = (document.getElementById('orderSearch')?.value  || '').toLowerCase().trim();
+  const statusF  = (document.getElementById('filterStatus')?.value  || '');
+  const productF = (document.getElementById('filterProduct')?.value || '');
+
+  filteredOrders = allOrders.filter(o => {
+    const matchSearch  = !searchQ  || [o.userName, o.userPhone, o.id].some(v => String(v||'').toLowerCase().includes(searchQ));
+    const matchStatus  = !statusF  || o.status === statusF;
+    const matchProduct = !productF || o.productType === productF;
+    return matchSearch && matchStatus && matchProduct;
+  });
+
+  currentPage = 1;
+  renderOrdersTable();
+}
+
+['orderSearch','filterStatus','filterProduct'].forEach(id => {
+  document.getElementById(id)?.addEventListener('input', () => {
+    // حفظ الفلتر
+    const key = 'azma_filter_' + id;
+    localStorage.setItem(key, document.getElementById(id).value);
+    applyFilters();
+  });
+});
+
+// استعادة الفلاتر المحفوظة
+function restoreFilters() {
+  ['filterStatus','filterProduct'].forEach(id => {
+    const saved = localStorage.getItem('azma_filter_' + id);
+    if (saved) { const el = document.getElementById(id); if (el) el.value = saved; }
+  });
+}
+
+/* ================================================================
+   جدول الطلبات
+   ================================================================ */
+function renderOrdersTable() {
+  const tbody = document.getElementById('ordersTableBody');
+  const label = document.getElementById('ordersCountLabel');
+  const total = filteredOrders.length;
+  const totalPages = Math.ceil(total / PAGE_SIZE) || 1;
+  if (currentPage > totalPages) currentPage = totalPages;
+
+  label.textContent = `${total} طلب — الصفحة ${currentPage} من ${totalPages}`;
+
+  if (total === 0) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">لا توجد طلبات</div><div class="empty-desc">لا تطابق أي طلب معايير البحث الحالية</div></div></td></tr>`;
+    renderPagination(0, 1);
+    return;
+  }
+
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const slice = filteredOrders.slice(start, start + PAGE_SIZE);
+
+  tbody.innerHTML = slice.map(order => {
+    const prod   = getProdInfo(order.productType);
+    const status = getStatusInfo(order.status);
+    const isNew  = order.status === 'جديد';
+    return `
+    <tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:0.6rem;">
+          <div style="width:4px;height:32px;border-radius:2px;background:${prod.color};flex-shrink:0;"></div>
+          <span class="badge badge-${order.productType}">${prod.icon} ${prod.name}</span>
+        </div>
+      </td>
+      <td>
+        <div class="order-customer">${escHtml(order.userName || 'عميل')} ${isNew ? '<span class="new-pulse"></span>' : ''}</div>
+        <div class="order-id">#${escHtml(order.id?.slice(-6) || '------')}</div>
+      </td>
+      <td><div class="order-phone">${escHtml(order.userPhone || '—')}</div></td>
+      <td><div class="order-price">${formatPrice(order.totalPrice)}</div></td>
+      <td>
+        <select class="status-select-inline" onchange="updateOrderStatus('${order.id}', this.value)" data-order-id="${order.id}">
+          ${Object.keys(STATUSES).map(s => `<option value="${s}" ${order.status===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </td>
+      <td><div class="order-date">${formatDate(order.createdAt)}</div></td>
+      <td>
+        <button class="btn btn-glass btn-icon btn-sm" onclick="openOrderModal('${order.id}')" title="عرض التفاصيل">👁</button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  renderPagination(total, totalPages);
+}
+
+function renderPagination(total, totalPages) {
+  const pag = document.getElementById('ordersPagination');
+  if (totalPages <= 1) { pag.innerHTML = ''; return; }
+  let html = `<button class="page-btn" onclick="goToPage(${currentPage-1})" ${currentPage===1?'disabled':''}>&#8250;</button>`;
+  for (let i = 1; i <= totalPages; i++) {
+    if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 2) {
+      html += `<button class="page-btn ${i===currentPage?'active':''}" onclick="goToPage(${i})">${i}</button>`;
+    } else if (Math.abs(i - currentPage) === 3) {
+      html += `<span style="color:var(--text-dim);padding:0 4px;">...</span>`;
+    }
+  }
+  html += `<button class="page-btn" onclick="goToPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>&#8249;</button>`;
+  pag.innerHTML = html;
+}
+
+function goToPage(p) {
+  const totalPages = Math.ceil(filteredOrders.length / PAGE_SIZE);
+  if (p < 1 || p > totalPages) return;
+  currentPage = p;
+  renderOrdersTable();
+}
+
+/* ================================================================
+   تحديث حالة الطلب
+   ================================================================ */
+async function updateOrderStatus(orderId, newStatus) {
+  if (!orderId || !newStatus) return;
+  try {
+    await db.collection('orders').doc(orderId).update({ status: newStatus });
+    showToast(`تم تحديث الحالة: ${newStatus}`, `الطلب #${orderId.slice(-6)}`);
+    // تحديث محلي
+    const idx = allOrders.findIndex(o => o.id === orderId);
+    if (idx !== -1) allOrders[idx].status = newStatus;
+    applyFilters();
+  } catch(err) {
+    console.warn('Update error:', err);
+    showToast('تم التحديث محلياً (بدون Firebase)', newStatus);
+    const idx = allOrders.findIndex(o => o.id === orderId);
+    if (idx !== -1) allOrders[idx].status = newStatus;
+    applyFilters();
+  }
+}
+
+/* ================================================================
+   مودال تفاصيل الطلب
+   ================================================================ */
+function openOrderModal(orderId) {
+  const order = allOrders.find(o => o.id === orderId);
+  if (!order) return;
+
+  const prod   = getProdInfo(order.productType);
+  const status = getStatusInfo(order.status);
+  const opts   = order.options || {};
+
+  document.getElementById('modalOrderTitle').innerHTML =
+    `${prod.icon} طلب #${escHtml(order.id?.slice(-6) || '------')}`;
+
+  const optRows = Object.entries(opts).map(([k, v]) =>
+    `<div class="detail-row"><div class="detail-key">${escHtml(k)}</div><div class="detail-val">${escHtml(v)}</div></div>`
+  ).join('');
+
+  document.getElementById('modalOrderBody').innerHTML = `
+    <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:1.4rem;padding:1rem;background:rgba(${hexToRgb(prod.color)},0.08);border:1px solid rgba(${hexToRgb(prod.color)},0.2);border-radius:12px;">
+      <span style="font-size:2rem;">${prod.icon}</span>
+      <div>
+        <div style="font-weight:800;font-size:1rem;">${prod.name}</div>
+        <span class="badge ${status.cls}"><span class="badge-dot" style="background:${status.dot}"></span>${escHtml(order.status)}</span>
+      </div>
+      <div style="margin-right:auto;text-align:left;">
+        <div style="font-size:1.4rem;font-weight:900;color:var(--gold);">${formatPrice(order.totalPrice)}</div>
+        <div style="font-size:0.75rem;color:var(--text-dim);">${formatDateFull(order.createdAt)}</div>
+      </div>
+    </div>
+
+    <div class="detail-row">
+      <div class="detail-key">اسم العميل</div>
+      <div class="detail-val" style="font-weight:700;">${escHtml(order.userName || '—')}</div>
+    </div>
+    <div class="detail-row">
+      <div class="detail-key">رقم الهاتف</div>
+      <div class="detail-val" style="direction:ltr;text-align:right;">${escHtml(order.userPhone || '—')}</div>
+    </div>
+    <div class="detail-row">
+      <div class="detail-key">المعرف</div>
+      <div class="detail-val" style="font-family:'Outfit',sans-serif;font-size:0.8rem;color:var(--text-dim);">${escHtml(order.id)}</div>
+    </div>
+    ${order.designText ? `<div class="detail-row"><div class="detail-key">نص التصميم</div><div class="detail-val" style="color:var(--gold);">"${escHtml(order.designText)}"</div></div>` : ''}
+    ${optRows ? `<div style="margin-top:0.8rem;padding-top:0.8rem;border-top:1px solid rgba(255,255,255,0.06);"><div style="font-size:0.78rem;font-weight:700;color:var(--text-dim);margin-bottom:0.4rem;">خيارات المنتج</div>${optRows}</div>` : ''}
+    ${order.designImage ? `<img src="${escHtml(order.designImage)}" alt="التصميم" class="design-preview-img" onerror="this.style.display='none'" />` : ''}
+
+    <div style="margin-top:1.4rem;">
+      <label style="font-size:0.82rem;font-weight:700;color:var(--text-muted);display:block;margin-bottom:0.5rem;">تغيير الحالة</label>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+        ${Object.keys(STATUSES).map(s => `
+          <button onclick="updateOrderStatus('${order.id}','${s}');closeOrderModal();" 
+                  style="padding:0.4rem 0.9rem;border-radius:8px;border:1px solid ${STATUSES[s].dot+'44'};background:${STATUSES[s].dot+'18'};color:${STATUSES[s].dot};cursor:pointer;font-family:'Tajawal',sans-serif;font-size:0.82rem;font-weight:700;transition:all 0.2s;${order.status===s?'box-shadow:0 0 0 2px '+STATUSES[s].dot+';':''}"
+                  onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'"
+          >${s}</button>`).join('')}
+      </div>
+    </div>`;
+
+  document.getElementById('orderModal').classList.add('open');
+}
+
+function closeOrderModal() {
+  document.getElementById('orderModal').classList.remove('open');
+}
+
+document.getElementById('closeModal').addEventListener('click', closeOrderModal);
+document.getElementById('orderModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('orderModal')) closeOrderModal();
+});
+
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return `${r},${g},${b}`;
+}
+
+/* ================================================================
+   لوحة المعلومات
+   ================================================================ */
+function renderDashboard() {
+  if (!document.getElementById('page-dashboard').classList.contains('active')) return;
+
+  // الإحصائيات
+  const total       = allOrders.length;
+  const newCount    = allOrders.filter(o => o.status === 'جديد').length;
+  const process     = allOrders.filter(o => o.status === 'قيد التجهيز').length;
+  const delivered   = allOrders.filter(o => o.status === 'تم التوصيل').length;
+  const todayStr    = new Date().toLocaleDateString('ar-JO');
+  const todayCount  = allOrders.filter(o => {
+    const d = o.createdAt?.toDate ? o.createdAt.toDate() : new Date();
+    return d.toLocaleDateString('ar-JO') === todayStr;
+  }).length;
+  const revenue     = allOrders
+    .filter(o => o.status !== 'ملغي')
+    .reduce((s, o) => s + (parseFloat(o.totalPrice) || 0), 0);
+  const customerSet = new Set(allOrders.map(o => o.userPhone || o.userId || '').filter(Boolean));
+
+  animateCount('stat-total',      total);
+  animateCount('stat-new',        newCount);
+  animateCount('stat-process',    process);
+  animateCount('stat-delivered',  delivered);
+  animateCount('stat-today',      todayCount);
+  animateCount('stat-customers',  customerSet.size);
+  document.getElementById('stat-revenue').textContent = revenue.toFixed(3);
+
+  // توزيع المنتجات
+  renderProductDist();
+
+  // الرسم البياني
+  renderOrdersChart();
+
+  // أحدث الطلبات
+  renderRecentOrders();
+}
+
+function animateCount(id, target) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const start = parseInt(el.textContent) || 0;
+  const duration = 600;
+  const startTime = performance.now();
+  function step(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.round(start + (target - start) * eased);
+    if (progress < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function renderProductDist() {
+  const counts = {};
+  allOrders.forEach(o => { counts[o.productType] = (counts[o.productType]||0) + 1; });
+  const max = Math.max(...Object.values(counts), 1);
+
+  const list = document.getElementById('productDistList');
+  if (!list) return;
+
+  const sorted = Object.entries(PRODUCTS).map(([k, p]) => ({ key: k, ...p, count: counts[k]||0 }))
+    .sort((a,b) => b.count - a.count);
+
+  list.innerHTML = sorted.map(p => `
+    <div class="product-dist-item">
+      <span class="dist-icon">${p.icon}</span>
+      <span class="dist-name">${p.name}</span>
+      <div class="dist-bar-wrap">
+        <div class="dist-bar">
+          <div class="dist-bar-fill" style="width:${(p.count/max*100).toFixed(1)}%;background:${p.color};"></div>
+        </div>
+      </div>
+      <span class="dist-count">${p.count}</span>
+    </div>`).join('');
+}
+
+function renderRecentOrders() {
+  const list = document.getElementById('recentOrdersList');
+  if (!list) return;
+  const recent = allOrders.slice(0, 10);
+  if (recent.length === 0) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">لا توجد طلبات بعد</div></div>`;
+    return;
+  }
+  list.innerHTML = recent.map(o => {
+    const prod = getProdInfo(o.productType);
+    const st   = getStatusInfo(o.status);
+    return `
+    <div class="recent-order-item">
+      <div class="recent-prod-dot" style="background:${prod.color};"></div>
+      <div style="flex:1;">
+        <div class="recent-order-name">${escHtml(o.userName||'عميل')} <span class="badge ${st.cls}" style="font-size:0.66rem;padding:0.15rem 0.45rem;">${escHtml(o.status)}</span></div>
+        <div class="recent-order-prod">${prod.icon} ${prod.name} — ${formatDate(o.createdAt)}</div>
+      </div>
+      <div class="recent-order-price">${formatPrice(o.totalPrice)}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderOrdersChart() {
+  const canvas = document.getElementById('ordersChart');
+  if (!canvas) return;
+
+  // تجميع الطلبات حسب اليوم (7 أيام)
+  const days = [];
+  const counts = {};
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const key = d.toLocaleDateString('ar-JO', { weekday:'short' });
+    days.push(key);
+    counts[key] = 0;
+  }
+  allOrders.forEach(o => {
+    const d = o.createdAt?.toDate ? o.createdAt.toDate() : new Date();
+    const now = new Date();
+    const diff = Math.floor((now - d) / 86400000);
+    if (diff <= 6) {
+      const key = d.toLocaleDateString('ar-JO', { weekday:'short' });
+      if (counts[key] !== undefined) counts[key]++;
+    }
+  });
+
+  const data = days.map(d => counts[d] || 0);
+
+  if (ordersChartInst) ordersChartInst.destroy();
+
+  ordersChartInst = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: days,
+      datasets: [{
+        label: 'الطلبات',
+        data,
+        backgroundColor: days.map((_, i) =>
+          `rgba(212,168,75,${0.4 + i * 0.09})`
+        ),
+        borderColor: 'rgba(212,168,75,0.8)',
+        borderWidth: 1,
+        borderRadius: 6,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#111018', borderColor: 'rgba(212,168,75,0.3)',
+          borderWidth: 1, titleColor: '#d4a84b', bodyColor: '#f0ece4',
+          padding: 12,
+          callbacks: {
+            label: ctx => `  ${ctx.parsed.y} طلب`
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          ticks: { color: 'rgba(240,236,228,0.5)', font: { family: 'Tajawal', size: 11 } },
+          border: { color: 'rgba(255,255,255,0.06)' }
+        },
+        y: {
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          ticks: { color: 'rgba(240,236,228,0.5)', font: { family: 'Tajawal', size: 11 }, stepSize: 1 },
+          border: { color: 'rgba(255,255,255,0.06)' },
+          beginAtZero: true,
+        }
+      }
+    }
+  });
+}
+
+/* ================================================================
+   العملاء
+   ================================================================ */
+function renderCustomers() {
+  const tbody = document.getElementById('customersTableBody');
+  const label = document.getElementById('customersCountLabel');
+  const searchQ = (document.getElementById('customerSearch')?.value || '').toLowerCase();
+
+  // استخراج العملاء من الطلبات
+  const customerMap = {};
+  allOrders.forEach(o => {
+    const phone = o.userPhone || o.userId || 'مجهول';
+    if (!customerMap[phone]) {
+      customerMap[phone] = {
+        name: o.userName || 'عميل',
+        phone,
+        orders: [], totalSpent: 0, lastActive: null, prodCounts: {}
+      };
+    }
+    const c = customerMap[phone];
+    c.orders.push(o);
+    c.totalSpent += parseFloat(o.totalPrice) || 0;
+    const d = o.createdAt?.toDate ? o.createdAt.toDate() : new Date();
+    if (!c.lastActive || d > c.lastActive) c.lastActive = d;
+    c.prodCounts[o.productType] = (c.prodCounts[o.productType]||0) + 1;
+  });
+
+  let customers = Object.values(customerMap);
+
+  if (searchQ) {
+    customers = customers.filter(c =>
+      c.name.toLowerCase().includes(searchQ) || c.phone.toLowerCase().includes(searchQ)
+    );
+  }
+
+  customers.sort((a,b) => (b.lastActive||0) - (a.lastActive||0));
+  label.textContent = `${customers.length} عميل مسجل`;
+
+  if (customers.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">👤</div><div class="empty-title">لا يوجد عملاء</div></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = customers.map((c, idx) => {
+    const color  = CUSTOMER_COLORS[idx % CUSTOMER_COLORS.length];
+    const topProd = Object.entries(c.prodCounts).sort((a,b)=>b[1]-a[1])[0];
+    const prod   = topProd ? getProdInfo(topProd[0]) : null;
+    const letter = c.name.charAt(0);
+    return `
+    <tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:0.7rem;">
+          <div class="customer-avatar-sm" style="background:${color};">${letter}</div>
+          <div>
+            <div class="customer-name">${escHtml(c.name)}</div>
+            <div class="customer-email">${c.orders.length} طلب</div>
+          </div>
+        </div>
+      </td>
+      <td style="direction:ltr;text-align:right;font-size:0.82rem;color:var(--text-muted);">${escHtml(c.phone)}</td>
+      <td style="font-weight:700;">${c.orders.length}</td>
+      <td style="color:var(--gold);font-weight:800;font-family:'Outfit',sans-serif;">${c.totalSpent.toFixed(3)} <span style="font-size:0.72rem;font-weight:400;color:var(--text-dim)">د.أ</span></td>
+      <td style="font-size:0.8rem;color:var(--text-muted);">${c.lastActive ? c.lastActive.toLocaleDateString('ar-JO') : '—'}</td>
+      <td>${prod ? `<span class="badge badge-${topProd[0]}">${prod.icon} ${prod.name}</span>` : '—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+document.getElementById('customerSearch')?.addEventListener('input', renderCustomers);
+
+/* ================================================================
+   المنتجات
+   ================================================================ */
+const defaultProductData = {
+  tshirt:   { price: 7.500,  desc: 'تيشيرت قطني فاخر بطباعة حرارية عالية الجودة' },
+  mug:      { price: 5.000,  desc: 'كوب سيراميك بتصميمك المخصص' },
+  cap:      { price: 6.000,  desc: 'طاقية كاب بتطريز أو طباعة مباشرة' },
+  pillow:   { price: 9.500,  desc: 'مخدة زينة بطباعة فوتوغرافية حادة' },
+  stickers: { price: 2.500,  desc: 'ملصقات لاصقة مقاومة للماء' },
+  frame:    { price: 12.000, desc: 'برواز فاخر بطباعة عالية الدقة' },
+};
+
+let productData = { ...JSON.parse(localStorage.getItem('azma_product_data') || '{}') };
+// مزج القيم الافتراضية
+Object.keys(defaultProductData).forEach(k => {
+  if (!productData[k]) productData[k] = { ...defaultProductData[k] };
+});
+
+function renderProductCards() {
+  const grid = document.getElementById('productsGrid');
+  const orderCounts = {};
+  allOrders.forEach(o => { orderCounts[o.productType] = (orderCounts[o.productType]||0)+1; });
+
+  grid.innerHTML = Object.entries(PRODUCTS).map(([key, prod]) => {
+    const d     = productData[key] || defaultProductData[key] || { price: 0, desc: '' };
+    const count = orderCounts[key] || 0;
+    const enabled = productEnabled[key] !== false;
+    return `
+    <div class="product-manage-card" style="--prod-color:${prod.color};--prod-border:${prod.border};${!enabled?'opacity:0.55;':''}">
+      <div class="prod-card-top">
+        <div class="prod-card-icon" style="border-color:${prod.border};">${prod.icon}</div>
+        <div>
+          <div class="prod-card-name">${prod.name}</div>
+          <div class="prod-card-count">${count} طلب حتى الآن</div>
+        </div>
+        <div style="margin-right:auto;display:flex;align-items:center;gap:0.6rem;">
+          <label class="switch" title="${enabled?'إيقاف':'تفعيل'} ${prod.name}" style="width:38px;height:20px;">
+            <input type="checkbox" ${enabled?'checked':''} onchange="toggleProduct('${key}', this.checked)" />
+            <span class="slider" style="height:20px;"></span>
+          </label>
+          <div class="badge badge-${key}" style="font-size:0.7rem;">${enabled?'نشط':'متوقف'}</div>
+        </div>
+      </div>
+
+      <div class="prod-price-row">
+        <span class="prod-price-label">السعر الأساسي:</span>
+        <input type="number" class="prod-price-input" id="price-${key}"
+               value="${d.price}" step="0.5" min="0" />
+        <span class="prod-currency">د.أ</span>
+      </div>
+
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">وصف المنتج</label>
+        <textarea class="prod-desc-input" id="desc-${key}" rows="2">${escHtml(d.desc)}</textarea>
+      </div>
+
+      <div class="prod-card-footer">
+        <button class="btn btn-glass btn-sm" onclick="saveProduct('${key}')">💾 حفظ</button>
+        <div style="font-size:0.72rem;color:var(--text-dim);align-self:center;">
+          <span style="color:${prod.color};font-weight:700;">${count}</span> طلب
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// حالة تفعيل/إيقاف المنتجات
+let productEnabled = {};
+
+function toggleProduct(key, enabled) {
+  productEnabled[key] = enabled;
+  localStorage.setItem('azma_product_enabled', JSON.stringify(productEnabled));
+  try {
+    db.collection('admin_settings').doc('products').set(
+      { [key]: enabled, updatedAt: firebase.firestore.FieldValue.serverTimestamp() },
+      { merge: true }
+    );
+  } catch(_) {}
+  showToast(enabled ? 'تم تفعيل المنتج ✅' : 'تم إيقاف المنتج ⏸️', PRODUCTS[key]?.name || key);
+  renderProductCards();
+}
+
+async function saveProduct(key) {
+  const price = parseFloat(document.getElementById(`price-${key}`)?.value) || 0;
+  const desc  = document.getElementById(`desc-${key}`)?.value || '';
+  productData[key] = { price, desc };
+  localStorage.setItem('azma_product_data', JSON.stringify(productData));
+  try {
+    await db.collection('product_settings').doc(key).set({ price, desc, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    showToast(`تم حفظ ${PRODUCTS[key]?.name}`, `السعر: ${price.toFixed(3)} د.أ`);
+  } catch(_) {
+    showToast(`تم الحفظ محلياً — ${PRODUCTS[key]?.name}`, `السعر: ${price.toFixed(3)} د.أ`);
+  }
+}
+
+document.getElementById('saveAllProductsBtn')?.addEventListener('click', async () => {
+  const keys = Object.keys(PRODUCTS);
+  for (const k of keys) await saveProduct(k);
+  showToast('تم حفظ جميع المنتجات ✅', 'جميع الأسعار والأوصاف محدثة');
+});
+
+/* ================================================================
+   الإعدادات
+   ================================================================ */
+async function loadSettings() {
+  try {
+    const doc = await db.collection('admin_settings').doc('main').get();
+    if (doc.exists) {
+      const s = doc.data();
+      setField('set-storeName',       s.storeName);
+      setField('set-storeEmail',      s.storeEmail);
+      setField('set-storePhone',      s.storePhone);
+      setField('set-storeAddress',    s.storeAddress);
+      setField('set-currency',        s.currency);
+      setField('set-shippingFee',     s.shippingFee);
+      setField('set-freeShippingMin', s.freeShippingMin);
+      setField('set-deliveryTime',    s.deliveryTime);
+      setField('set-regions',         s.regions);
+      setCheck('set-freeShipping',    s.freeShipping);
+      setCheck('set-notifNewOrder',   s.notifNewOrder);
+      setCheck('set-notifSound',      s.notifSound);
+      setCheck('set-notifComplete',   s.notifComplete);
+      setCheck('set-notifCancel',     s.notifCancel);
+      setField('set-welcomeMsg',      s.welcomeMsg);
+      setField('set-orderConfirmMsg', s.orderConfirmMsg);
+      setCheck('set-acceptOrders',    s.acceptOrders);
+      setCheck('set-maintenance',     s.maintenance);
+    }
+  } catch(_) {
+    // تحميل من localStorage
+    const saved = localStorage.getItem('azma_admin_settings');
+    if (saved) {
+      try {
+        const s = JSON.parse(saved);
+        Object.keys(s).forEach(k => {
+          const el = document.getElementById(k);
+          if (!el) return;
+          if (el.type === 'checkbox') el.checked = s[k];
+          else el.value = s[k];
+        });
+      } catch(_){}
+    }
+  }
+}
+
+function setField(id, val) { const el=document.getElementById(id); if(el&&val!==undefined) el.value=val; }
+function setCheck(id, val) { const el=document.getElementById(id); if(el&&val!==undefined) el.checked=!!val; }
+
+function getSettingsObj() {
+  return {
+    storeName:       document.getElementById('set-storeName')?.value       || '',
+    storeEmail:      document.getElementById('set-storeEmail')?.value      || '',
+    storePhone:      document.getElementById('set-storePhone')?.value      || '',
+    storeAddress:    document.getElementById('set-storeAddress')?.value    || '',
+    currency:        document.getElementById('set-currency')?.value        || 'JOD',
+    shippingFee:     parseFloat(document.getElementById('set-shippingFee')?.value) || 2.5,
+    freeShippingMin: parseFloat(document.getElementById('set-freeShippingMin')?.value) || 20,
+    deliveryTime:    document.getElementById('set-deliveryTime')?.value    || '',
+    regions:         document.getElementById('set-regions')?.value         || '',
+    freeShipping:    document.getElementById('set-freeShipping')?.checked  || false,
+    notifNewOrder:   document.getElementById('set-notifNewOrder')?.checked || false,
+    notifSound:      document.getElementById('set-notifSound')?.checked    || false,
+    notifComplete:   document.getElementById('set-notifComplete')?.checked || false,
+    notifCancel:     document.getElementById('set-notifCancel')?.checked   || false,
+    welcomeMsg:      document.getElementById('set-welcomeMsg')?.value      || '',
+    orderConfirmMsg: document.getElementById('set-orderConfirmMsg')?.value || '',
+    acceptOrders:    document.getElementById('set-acceptOrders')?.checked  || false,
+    maintenance:     document.getElementById('set-maintenance')?.checked   || false,
+    updatedAt:       new Date().toISOString(),
+  };
+}
+
+document.getElementById('saveSettingsBtn')?.addEventListener('click', async () => {
+  const settings = getSettingsObj();
+  localStorage.setItem('azma_admin_settings', JSON.stringify(settings));
+  try {
+    await db.collection('admin_settings').doc('main').set({
+      ...settings,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    showToast('تم حفظ الإعدادات في Firebase ✅', 'جميع التغييرات محفوظة');
+  } catch(_) {
+    showToast('تم الحفظ محلياً ✅', 'لا يوجد اتصال بـ Firebase');
+  }
+});
+
+/* ================================================================
+   تصدير الطلبات (CSV)
+   ================================================================ */
+document.getElementById('exportOrdersBtn')?.addEventListener('click', () => {
+  const headers = ['المعرف','العميل','الهاتف','المنتج','السعر','الحالة','التاريخ'];
+  const rows = filteredOrders.map(o => [
+    o.id,
+    o.userName || '',
+    o.userPhone || '',
+    getProdInfo(o.productType).name,
+    (parseFloat(o.totalPrice)||0).toFixed(3),
+    o.status || '',
+    o.createdAt?.toDate ? o.createdAt.toDate().toLocaleDateString('ar-JO') : '',
+  ]);
+  const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = `azma-orders-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+  showToast('تم تصدير الطلبات ✅', `${filteredOrders.length} طلب في ملف CSV`);
+});
+
+/* ================================================================
+   تصدير PDF
+   ================================================================ */
+document.getElementById('pdfExportBtn')?.addEventListener('click', () => {
+  if (typeof window.jspdf === 'undefined') {
+    showToast('جاري تحميل مكتبة PDF...');
+    return;
+  }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF('landscape', 'mm', 'a4');
+  const now = new Date();
+  const hijri = now.toLocaleDateString('ar-SA-u-ca-islamic', { day:'numeric', month:'long', year:'numeric' });
+  const miladi = now.toLocaleDateString('ar-JO', { day:'numeric', month:'long', year:'numeric' });
+  // Reference to miladi for the text below
+
+  // ترويسة
+  doc.setR2L(true);
+  doc.setFont('Tajawal', '', 'normal');
+  doc.setFontSize(22);
+  doc.setTextColor('#d4a84b');
+  doc.text('أزمـا', 105, 20, { align: 'center' });
+  doc.setFontSize(14);
+  doc.setTextColor('#333');
+  doc.text('كشف طلبات أزما', 105, 30, { align: 'center' });
+  doc.setFontSize(9);
+  doc.setTextColor('#888');
+  doc.text(`التاريخ: ${hijri} هـ — ${miladi} م`, 105, 37, { align: 'center' });
+
+  // تحضير البيانات + ترتيب الأسماء من الألف إلى الياء
+  const rows = filteredOrders.length ? filteredOrders : allOrders;
+  const sorted = [...rows].sort((a, b) => {
+    const na = (a.userName || '').trim();
+    const nb = (b.userName || '').trim();
+    return na.localeCompare(nb, 'ar');
+  });
+
+  const tableData = sorted.map(o => [
+    o.id?.slice(-6) || '—',
+    o.userName || '—',
+    o.userPhone || '—',
+    getProdInfo(o.productType).name,
+    o.status || '—',
+    (parseFloat(o.totalPrice)||0).toFixed(3),
+    o.createdAt?.toDate ? o.createdAt.toDate().toLocaleDateString('ar-JO') : '—',
+  ]);
+
+  doc.autoTable({
+    head: [['رقم الطلب', 'اسم العميل', 'رقم الجوال', 'المنتج', 'الحالة', 'السعر', 'تاريخ الطلب']],
+    body: tableData,
+    startY: 42,
+    styles: {
+      font: 'Tajawal', fontSize: 7, cellPadding: 2.5,
+      halign: 'right', valign: 'middle',
+      textColor: '#222',
+    },
+    headStyles: {
+      fillColor: '#d4a84b', textColor: '#000',
+      fontStyle: 'bold', fontSize: 8,
+    },
+    alternateRowStyles: {
+      fillColor: '#f8f4ec',
+    },
+    columnStyles: {
+      0: { cellWidth: 20 },
+      1: { cellWidth: 35 },
+      2: { cellWidth: 28 },
+      3: { cellWidth: 25 },
+      4: { cellWidth: 22 },
+      5: { cellWidth: 20, halign: 'left' },
+      6: { cellWidth: 25 },
+    },
+    tableWidth: 'auto',
+    margin: { top: 42 },
+    didDrawPage: (data) => {
+      doc.setFontSize(7);
+      doc.setTextColor('#aaa');
+      doc.text(`تم التصدير: ${milادي} — الصفحة ${data.pageNumber}`, 200, 195, { align: 'left' });
+    },
+  });
+
+  // تذييل
+  const totalOrders = sorted.length;
+  const totalRevenue = sorted.reduce((s, o) => s + (parseFloat(o.totalPrice)||0), 0);
+  doc.setFontSize(9);
+  doc.setTextColor('#d4a84b');
+  doc.text(`إجمالي الطلبات: ${totalOrders} | إجمالي الإيرادات: ${totalRevenue.toFixed(3)} د.أ`, 105, doc.lastAutoTable.finalY + 12, { align: 'center' });
+
+  doc.save(`كشف_طلبات_أزما_${now.toISOString().slice(0,10)}.pdf`);
+  showToast('تم تصدير كشف PDF ✅', `${sorted.length} طلب — مرتبة أبجدياً`);
+});
+
+/* ================================================================
+   إشعار الجرس
+   ================================================================ */
+document.getElementById('notifBell')?.addEventListener('click', () => {
+  document.getElementById('notifDot').style.display = 'none';
+  navigateTo('orders');
+  document.getElementById('filterStatus').value = 'جديد';
+  applyFilters();
+});
+
+/* ================================================================
+   تهيئة التطبيق
+   ================================================================ */
+function init() {
+  startClock();
+  restoreFilters();
+
+  // استعادة الصفحة الأخيرة
+  const lastPage = localStorage.getItem('azma_admin_page') || 'dashboard';
+  navigateTo(lastPage);
+
+  // بدء الاستماع للطلبات
+  startOrdersListener();
+
+  // تحميل بيانات المنتجات من Firestore
+  db.collection('product_settings').get().then(snap => {
+    snap.forEach(doc => {
+      productData[doc.id] = doc.data();
+    });
+  }).catch(() => {});
+
+  // تحميل حالة تفعيل المنتجات
+  const savedEnabled = localStorage.getItem('azma_product_enabled');
+  if (savedEnabled) {
+    try { productEnabled = JSON.parse(savedEnabled); } catch(_) {}
+  }
+  db.collection('admin_settings').doc('products').get().then(doc => {
+    if (doc.exists) {
+      const data = doc.data();
+      Object.keys(data).forEach(k => {
+        if (PRODUCTS[k]) productEnabled[k] = data[k];
+      });
+      localStorage.setItem('azma_product_enabled', JSON.stringify(productEnabled));
+    }
+  }).catch(() => {});
+}
+
+// بدء التشغيل
+document.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+</html>
